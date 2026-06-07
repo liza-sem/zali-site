@@ -1,7 +1,38 @@
+import type { Metadata } from 'next'
 import React, { Suspense } from 'react'
 import { ZaliLoader } from '@/components/ZaliLoader'
 import { ZaliNavBridge } from '@/components/ZaliNavBridge'
 import './zali-fonts.css'
+
+const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://zali.so'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: 'Join the waitlist',
+  description: 'Join the waitlist',
+  openGraph: {
+    title: 'Join the waitlist',
+    description: 'Join the waitlist',
+    url: siteUrl,
+    siteName: 'Zali',
+    type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/og.jpg',
+        width: 1024,
+        height: 640,
+        alt: 'Zali is a task manager that builds your list from your messages using AI.',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Join the waitlist',
+    description: 'Join the waitlist',
+    images: ['/og.jpg'],
+  },
+}
 
 export default function FrontendLayout(props: { children: React.ReactNode }) {
   const { children } = props
