@@ -1110,13 +1110,6 @@ html.ios .stage-sticky.is-past{
   width:100%!important;z-index:10}
 html.ios .scene{overflow:hidden;contain:layout style paint}
 html.ios.touch .scene{overflow-x:hidden;overflow-y:visible}
-html.ios .orbit .anode{
-  transform:translate3d(calc(var(--sx,0px) * var(--scatter-x,1.18)),calc(var(--sy,0px) * var(--scatter-y,1.14)),0)!important;
-  opacity:calc(1 - 1.05 * var(--conv));
-  will-change:auto}
-html.ios .orbit .anode.aextra{
-  transform:translate3d(calc(var(--sx,0px) * 1.42),calc(var(--sy,0px) * 1.34),0)!important;
-  opacity:calc(1 - 2.8 * var(--conv))}
 html.touch:not(.ios) .stage-sticky{
   overflow:hidden;
   -webkit-mask-image:none;
@@ -1752,13 +1745,21 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
     var stageSticky=stage.querySelector('.stage-sticky');
     var viewH=window.innerHeight;
     var stageStart=0, stageTravel=1;
-    function snap(n){return isTouch?Math.round(n):+n.toFixed(1);}
+    var iosRaw=0, lastIosSy=0, iosScrollActive=false, iosIdleTimer=null;
+    function snap(n){
+      if(isIOS) return +n.toFixed(2);
+      return isTouch?Math.round(n):+n.toFixed(1);
+    }
     function px(n){return snap(n)+'px';}
-    function quantize(v){return isIOS?Math.round(v*200)/200:v;}
     function measureStage(){
       viewH=window.innerHeight;
-      stageStart=stage.getBoundingClientRect().top+(window.scrollY||document.documentElement.scrollTop||0);
+      var sy=window.scrollY||document.documentElement.scrollTop||0;
+      stageStart=stage.getBoundingClientRect().top+sy;
       stageTravel=Math.max(1,stage.offsetHeight-viewH);
+      if(isIOS){
+        iosRaw=clamp((sy-stageStart)/stageTravel);
+        lastIosSy=sy;
+      }
     }
     measureStage();
     if(isIOS){
@@ -1771,12 +1772,23 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       raf=null;
       var raw;
       if(isIOS){
-        var sy=Math.round(window.scrollY||document.documentElement.scrollTop||0);
-        raw=quantize(clamp((sy-stageStart)/stageTravel));
+        var sy=window.scrollY||document.documentElement.scrollTop||0;
+        var targetRaw=clamp((sy-stageStart)/stageTravel);
+        if(Math.abs(sy-lastIosSy)>0.2){
+          iosScrollActive=true;
+          clearTimeout(iosIdleTimer);
+          iosIdleTimer=setTimeout(function(){ iosScrollActive=false; }, 120);
+        }
+        lastIosSy=sy;
+        var blend=iosScrollActive?0.5:1;
+        iosRaw+=(targetRaw-iosRaw)*blend;
+        if(!iosScrollActive&&Math.abs(targetRaw-iosRaw)<0.0008) iosRaw=targetRaw;
+        raw=iosRaw;
+        var pinY=Math.round(sy);
         if(stageSticky){
-          if(sy<stageStart){
+          if(pinY<stageStart){
             stageSticky.classList.remove('is-pinned','is-past');
-          }else if(sy<=stageStart+stageTravel){
+          }else if(pinY<=stageStart+stageTravel){
             stageSticky.classList.add('is-pinned');
             stageSticky.classList.remove('is-past');
           }else{
@@ -1789,14 +1801,14 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
         viewH=window.innerHeight;
         var stageTop=r.top;
         var travel=r.height-viewH;
-        raw=quantize(clamp((0-stageTop)/(travel||1)));
+        raw=clamp((0-stageTop)/(travel||1));
       }
       // first part of the pin is the tools→triage story; the rest is the cleared inbox → task list → outro lists
       var SPLIT=0.72;
-      var p=quantize(clamp(raw/SPLIT));
+      var p=clamp(raw/SPLIT);
       // finale tail: clean focused view + task list
       var pfRaw=clamp((raw-SPLIT)/(1-SPLIT));
-      var pf=quantize(clamp(pfRaw/0.66));
+      var pf=clamp(pfRaw/0.66);
       stage.style.setProperty('--p',p.toFixed(3));
 
       // beat segments
@@ -1815,10 +1827,11 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       var trTxt    = clamp((p-0.60)/0.04) * (1 - clamp((p-0.86)/0.04));          // triage  .60–.90
 
       // apps converge into the centre
-      orbit.style.setProperty('--conv',quantize(conv).toFixed(3));
+      orbit.style.setProperty('--conv',conv.toFixed(3));
       // mobile: gentle scroll parallax — icons drift up as you scroll into the tools beat
-      if(innerWidth<=760&&!isIOS){
-        var drift=snap(-clamp((p-0.02)/0.18)*12*(1-conv*0.85));
+      if(innerWidth<=760){
+        var driftAmt=isIOS?8:12;
+        var drift=snap(-clamp((p-0.02)/0.18)*driftAmt*(1-conv*0.85));
         orbit.style.setProperty('--drift',px(drift));
       }else{ orbit.style.removeProperty('--drift'); }
       // as soon as they start spiralling in, pop + fade the message bubbles (absorbed into the timeline)
@@ -1827,7 +1840,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       // centred headline holds, then clears the instant the timeline line arrives
       if(sceneCenter){
         sceneCenter.style.opacity=clamp(toolsTxt).toFixed(3);
-        var scY=isIOS?0:-snap(conv*20);
+        var scY=snap(-conv*(isIOS?14:20));
         sceneCenter.style.transform='translate3d(-50%,-50%,0) translate3d(0,'+px(scY)+',0) scale('+(1-conv*0.06).toFixed(3)+')';
       }
 
@@ -2033,9 +2046,16 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       if(!raf) raf=requestAnimationFrame(sync);
     }
     window.ZaliOnScroll=onScroll;
-    window.addEventListener('scroll',onScroll,{passive:true});
-    if(!isIOS) window.addEventListener('resize',onScroll);
-    sync();
+    if(isIOS){
+      (function iosFrame(){
+        sync();
+        requestAnimationFrame(iosFrame);
+      })();
+    }else{
+      window.addEventListener('scroll',onScroll,{passive:true});
+      window.addEventListener('resize',onScroll);
+      sync();
+    }
   }
 
   // ── views: one timeline, sliced ──
