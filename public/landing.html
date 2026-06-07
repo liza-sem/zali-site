@@ -267,7 +267,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 @keyframes appfloat-b{0%,100%{transform:translate(-50%,-50%) translate(0,0)}50%{transform:translate(-50%,-50%) translate(4px,-5px)}}
 /* mobile: scattered field with gentle float — pulls to centre on scroll */
 @media(max-width:760px){
-  .orbit{animation:none;--scatter-x:1.34;--scatter-y:1.28;
+  .orbit{animation:none;--scatter-x:1.18;--scatter-y:1.14;
     transform:translate3d(-50%,-50%,0) translate3d(0,var(--drift,0px),0)}
   .anode{transform:translate3d(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv))), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv))),0)}
   .anode.aextra{transform:translate3d(calc(var(--sx,0px) * 1.42), calc(var(--sy,0px) * 1.34),0)}
@@ -497,22 +497,34 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 .tl-tab.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .tl-stack{display:grid}
 .tl-body{grid-area:1/1}
+/* desktop: break scrollytelling out of the 680px wrap so cards + side pings aren't clipped */
+@media(min-width:761px){
+  .converge-section{
+    width:100vw;max-width:100vw;
+    margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+  .scene{width:min(980px,calc(100vw - 2 * var(--page-pad)));max-width:min(980px,calc(100vw - 2 * var(--page-pad)))}
+  .fin-lists{width:min(980px,calc(100vw - 2 * var(--page-pad)))}
+  .scene-footer{width:min(1000px,calc(100vw - 2 * var(--page-pad)))}
+  .stage-sticky{overflow:visible}
+}
 @media(max-width:760px){
   :root{--page-pad:20px}
-  .wrap{max-width:100%;width:100%}
+  body{width:100%;max-width:100%;overflow-x:clip}
+  .wrap,.stage,.converge-section,.hero{max-width:100%;width:100%;overflow-x:clip}
+  .hero .card-shell::before{width:min(120%,calc(100% + 48px))}
   .scene{width:100%;max-width:100%;padding:0 var(--page-pad);overflow-x:clip;overflow-y:visible}
-  .stage-sticky{overflow:hidden}
+  .stage-sticky{overflow:hidden;max-width:100%}
   .scene-center{width:100%;max-width:100%}
-  /* absolute scene cards ignore scene padding — match hero side inset */
+  /* absolute scene cards ignore scene padding — size to scene, not 100vw */
   .scene .merge-thread.tl-card{
-    width:min(428px,calc(100vw - 2 * var(--page-pad)));
-    max-width:min(428px,calc(100vw - 2 * var(--page-pad)))}
+    width:min(428px,calc(100% - 2 * var(--page-pad)));
+    max-width:min(428px,calc(100% - 2 * var(--page-pad)))}
   .scene .stage-triage{
-    width:min(430px,calc(100vw - 2 * var(--page-pad)));
-    max-width:min(430px,calc(100vw - 2 * var(--page-pad)))}
+    width:min(430px,calc(100% - 2 * var(--page-pad)));
+    max-width:min(430px,calc(100% - 2 * var(--page-pad)))}
   .scene .fin-wrap{
-    width:min(462px,calc(100vw - 2 * var(--page-pad)));
-    max-width:min(462px,calc(100vw - 2 * var(--page-pad)));
+    width:min(462px,calc(100% - 2 * var(--page-pad)));
+    max-width:min(462px,calc(100% - 2 * var(--page-pad)));
     overflow:visible}
   /* calmer vertical rhythm on phones */
   .section{padding:84px 0}
@@ -527,7 +539,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   .scene-center{padding-left:var(--page-pad);padding-right:var(--page-pad);box-sizing:border-box}
   /* soft transparent halo — icons fade behind the headline */
   .scene-center::before{
-    display:block;width:min(92vw,480px);height:min(62vh,460px);
+    display:block;width:min(100%,480px);height:min(62vh,460px);
     border-radius:50%;filter:blur(28px);
     background:radial-gradient(ellipse 100% 90% at 50% 50%,
       var(--bg) 0%,rgba(239,231,214,.78) 36%,rgba(239,231,214,.3) 56%,transparent 76%)}
@@ -835,7 +847,7 @@ html.light .scene-center::before{display:block;left:50%;top:50%;transform:transl
   background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.82) 0%,rgba(216,215,227,.48) 36%,rgba(228,227,235,.18) 58%,transparent 72%);filter:blur(16px)}
 @media(max-width:760px){
   html.light .scene-center::before{
-    width:min(92vw,480px);height:min(62vh,460px);border-radius:50%;
+    width:min(100%,480px);height:min(62vh,460px);border-radius:50%;
     background:radial-gradient(ellipse 100% 90% at 50% 50%,
       rgba(216,215,227,.96) 0%,rgba(216,215,227,.68) 34%,
       rgba(228,227,235,.3) 54%,rgba(239,238,245,.08) 68%,transparent 78%);
@@ -1042,10 +1054,10 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 @media(max-width:760px){
   /* outro: cap3 starts at bottom like other beats, rides up on scroll, cards swipe beneath */
   #finCap3{z-index:7}
-  .fin-lists{top:58%;left:0;right:0;width:100%;max-width:100%;margin:0;transform:none;
+  .scene .fin-lists{top:58%;left:0;right:0;width:100%;max-width:100%;min-width:0;margin:0;transform:none;
     gap:12px;align-items:flex-start;
-    overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;touch-action:pan-x;
+    overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;touch-action:pan-x pinch-zoom;
     padding:0 var(--page-pad) 12px;scroll-padding-inline:var(--page-pad);scrollbar-width:none;
     box-sizing:border-box}
   .fin-lists::-webkit-scrollbar{display:none}
@@ -1134,7 +1146,7 @@ html.touch .scene{overflow-x:clip;overflow-y:visible}
 <!-- HERO -->
 <header class="hero" id="waitlist" style="font-family: Helvetica">
   <h1 class="hero-title" style="font-family: &quot;Cardo&quot;; font-weight: 400">Catch it or lose it.</h1>
-  <p class="hero-sub" style="width: 577px">Zali is a task manager that builds your list from your messages using AI.</p>
+  <p class="hero-sub">Zali is a task manager that builds your list from your messages using AI.</p>
   <div class="card-shell">
   <div class="card">
     <div class="card-head">
