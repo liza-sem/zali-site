@@ -15,8 +15,9 @@ You do **not** need SSH if you use **GitHub → Hostinger** deploy (recommended)
    - `DATABASE_URL` — Supabase **zali-board** direct Postgres URI (port 5432)
    - `PAYLOAD_SECRET` — run `openssl rand -hex 32`
    - `NEXT_PUBLIC_SERVER_URL` — `https://zali.so`
-   - `MAUTIC_FORM_SUBMIT_URL` — when Mautic is live (waitlist; optional until then)
-   - Supabase waitlist keys — optional; placeholder mode works without them
+   - `MAUTIC_FORM_SUBMIT_URL` — `https://mail.zali.so/form/submit?formId=2`
+   - `MAUTIC_FORM_NAME` — `waitlist`
+   - `MAUTIC_FORM_ID` — `2`
 5. Point `zali.so` DNS to Hostinger (A record or nameservers).
 6. First deploy: open `https://zali.so/admin`, create your Payload admin user.
 

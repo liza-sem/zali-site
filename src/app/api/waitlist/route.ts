@@ -7,19 +7,26 @@ async function submitToMautic(email: string, source: string) {
   const submitUrl = process.env.MAUTIC_FORM_SUBMIT_URL
   if (!submitUrl) return null
 
-  const formName = process.env.MAUTIC_FORM_NAME || 'zali_waitlist'
+  const formName = process.env.MAUTIC_FORM_NAME || 'waitlist'
+  const formId = process.env.MAUTIC_FORM_ID || '2'
   const body = new URLSearchParams()
-  body.set(`mauticform[email]`, email)
-  body.set(`mauticform[source]`, source)
-  body.set(`mauticform[formId]`, process.env.MAUTIC_FORM_ID || '')
-  body.set(`mauticform[return]`, '')
-  body.set(`mauticform[formName]`, formName)
+  body.set('mauticform[email]', email)
+  body.set('mauticform[formId]', formId)
+  body.set('mauticform[return]', '')
+  body.set('mauticform[formName]', formName)
+  body.set('mauticform[submit]', '1')
 
   const res = await fetch(submitUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'ZaliWaitlist/1.0',
+    },
     body: body.toString(),
+    redirect: 'follow',
   })
+
+  console.log('[waitlist mautic]', { email, source, status: res.status })
 
   if (!res.ok) {
     console.error('Mautic waitlist submit failed', res.status, await res.text())
