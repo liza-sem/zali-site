@@ -36,6 +36,7 @@ html{scroll-behavior:auto;max-width:100%}
   --mono:'Space Mono',monospace;
   --ease:cubic-bezier(.2,.8,.2,1);
   --loader-paper:#F7F0DE; --loader-ink:#211E18;
+  --page-pad:24px;
 }
 body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;max-width:100%;overscroll-behavior-y:none;touch-action:pan-y;letter-spacing:-.005em;
   background:
@@ -49,8 +50,8 @@ a{color:inherit;text-decoration:none}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 2 -0.5'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat:repeat;background-size:300px}
 /* grain stays on the page canvas — panels sit above it */
-.card-shell,.card,.triage,.tl-card,.merge-thread,.fin-card,.fin-wrap,.ex-card,.view-body,.post,.thread,.tg-card,.tg-stack,.stage-triage,.confess-aside,.fbox,.inbox-ico,.fin-msg-bub,.ft-c{position:relative;z-index:2;isolation:isolate}
-.wrap{max-width:680px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.card-shell,.card,.triage,.tl-card,.merge-thread,.fin-card,.ex-card,.view-body,.post,.thread,.tg-card,.tg-stack,.stage-triage,.confess-aside,.fbox,.inbox-ico,.fin-msg-bub,.ft-c{position:relative;z-index:2;isolation:isolate}
+.wrap{max-width:680px;margin:0 auto;padding:0;position:relative;z-index:2}
 
 /* ── logo ── */
 .logo{display:flex;align-items:center;justify-content:center;gap:11px;padding:34px 0 0}
@@ -59,7 +60,7 @@ a{color:inherit;text-decoration:none}
 @keyframes bloom{0%,100%{transform:rotate(0)}50%{transform:rotate(40deg) scale(1.06)}}
 
 /* ── hero ── */
-.hero{min-height:calc(100vh - 70px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0 60px;text-align:left}
+.hero{min-height:calc(100vh - 70px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px var(--page-pad) 60px;text-align:left}
 .hero-title{font-weight:600;font-size:clamp(1.95rem,5.2vw,3.1rem);line-height:1.05;letter-spacing:-.035em;text-align:center;max-width:620px;margin:0 auto 16px}
 .hero-sub{text-align:center;max-width:min(720px,92vw);margin:0 auto 30px;font-size:1.02rem;line-height:1.45;color:var(--ink-2);text-wrap:balance}
 .hero-meta{display:inline-flex;align-items:center;gap:10px;margin:0 auto 26px;font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
@@ -84,7 +85,6 @@ a{color:inherit;text-decoration:none}
   background:radial-gradient(ellipse at center,rgba(255,255,255,.75) 0%,rgba(255,255,255,.22) 44%,transparent 70%)}
 @keyframes cardin{to{opacity:1;transform:none}}
 @media(max-width:560px){
-  .wrap{padding:0 18px}
   .card{padding:26px 22px}.card-head{margin:-26px -22px 20px}
   .field,.confess-form .field{min-width:0}
   .ex-form{flex-wrap:wrap}
@@ -244,8 +244,8 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 
 /* ── converge: a pinned scene — centered → timeline → push aside → by conversation ── */
-.stage{position:relative;height:620vh;margin-top:22px;--p:0;width:100%;max-width:100%;margin-left:0}
-.stage-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;overscroll-behavior:contain;
+.stage{position:relative;height:620vh;margin-top:22px;--p:0;width:100vw;max-width:100vw;margin-left:calc(50% - 50vw)}
+.stage-sticky{position:sticky;top:0;height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%);
   mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%)}
 .orbit{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;--R:clamp(176px,20vw,280px);--conv:0;
@@ -265,17 +265,23 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 @keyframes spin-rev{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
 @keyframes appfloat-a{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
 @keyframes appfloat-b{0%,100%{transform:translate(-50%,-50%) translate(0,0)}50%{transform:translate(-50%,-50%) translate(4px,-5px)}}
-/* mobile: scattered ring with gentle float — pulls to centre on scroll */
-@media(max-width:640px){
-  .orbit{animation:none;--scatter-x:1.1;--scatter-y:1.06;transform:translate(-50%,-50%) translateY(var(--drift,0px))}
-  .anode{transform:translate(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv))), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv))))}
-  .anode.aextra{transform:translate(calc(var(--sx,0px) * 1.14), calc(var(--sy,0px) * 1.08))}
-  .anode .ai{width:44px;height:44px;padding:9px;border-radius:13px;animation:appfloat-a 5.4s ease-in-out infinite}
-  .anode:nth-child(3n+1) .ai{animation-duration:5.8s;animation-delay:-1.4s}
-  .anode:nth-child(3n+2) .ai{animation-name:appfloat-b;animation-duration:6.4s;animation-delay:-2.6s}
-  .anode:nth-child(3n) .ai{animation-duration:5.1s;animation-delay:-.6s}
+/* mobile: scattered field with gentle float — pulls to centre on scroll */
+@media(max-width:760px){
+  .orbit{animation:none;--scatter-x:1.34;--scatter-y:1.28;
+    transform:translate3d(-50%,-50%,0) translate3d(0,var(--drift,0px),0)}
+  .anode{transform:translate3d(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv))), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv))),0)}
+  .anode.aextra{transform:translate3d(calc(var(--sx,0px) * 1.42), calc(var(--sy,0px) * 1.34),0)}
+  .anode:nth-child(3n+1){transform:translate3d(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv)) + 8px), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv)) - 6px),0)}
+  .anode:nth-child(3n+2){transform:translate3d(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv)) - 10px), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv)) + 8px),0)}
+  .anode:nth-child(3n).aextra{transform:translate3d(calc(var(--sx,0px) * 1.46), calc(var(--sy,0px) * 1.36),0)}
+  .anode .ai{width:42px;height:42px;padding:8px;border-radius:12px;
+    box-shadow:0 14px 30px -16px rgba(33,30,24,.28);
+    animation:appfloat-a 6.2s ease-in-out infinite}
+  .anode:nth-child(3n+1) .ai{animation-duration:6.8s;animation-delay:-1.6s}
+  .anode:nth-child(3n+2) .ai{animation-name:appfloat-b;animation-duration:7.4s;animation-delay:-3.1s}
+  .anode:nth-child(3n) .ai{animation-duration:5.8s;animation-delay:-.8s}
   .orbit.converging .anode .ai{animation-play-state:paused}
-  .anode .abub{white-space:normal;max-width:min(132px,36vw);font-size:.58rem;line-height:1.35;padding:6px 9px;
+  .anode .abub{white-space:normal;max-width:min(132px,34vw);font-size:.58rem;line-height:1.35;padding:6px 9px;
     text-align:center;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
 }
 
@@ -472,7 +478,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.card-shell{opacity:1;transform:none;animation:none}.card{opacity:1;transform:none;animation:none}.logo .mark,.clock .tick,.scrollcue .arr,.anode .ai,.orbit{animation:none}.anode .abub{animation:none;opacity:1;transform:translateX(-50%)}.orbit{--drift:0px!important}.fin-spark::before,.fin-spark::after{animation:none;opacity:.5}}
 
 /* ── converge scene: centered headline, then a card that slides aside ── */
-.scene{position:relative;width:min(980px,92vw);height:min(72vh,560px);margin:0 auto}
+.scene{position:relative;width:min(980px,92vw);height:min(72vh,560px);margin:0 auto;padding:0 var(--page-pad);overflow:visible}
 .scene-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:min(440px,86vw);text-align:center;pointer-events:none;will-change:opacity,transform;isolation:isolate}
 .scene-center::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:165%;height:230%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side, var(--bg) 42%, rgba(239,231,214,.72) 62%, transparent 82%);filter:blur(3px)}
 .scene-center .h2{margin:0}
@@ -483,7 +489,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 .side-text .st-msg .h2{margin:0}
 .side-text .st-msg .lead{margin:9px 0 0;font-size:.98rem;color:var(--ink-2)}
 .tl-card{position:absolute;top:50%;left:50%;width:428px;max-width:88vw;z-index:4;
-  transform:translate(calc(-50% + var(--cardX,0px)), calc(-50% + var(--cardY,0px))) scale(var(--cardScale,.97));
+  transform:translate3d(calc(-50% + var(--cardX,0px)), calc(-50% + var(--cardY,0px)), 0) scale(var(--cardScale,.97));
   will-change:transform,opacity}
 .tl-tabs{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
 .tl-tab{font-family:var(--mono);font-size:.52rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
@@ -491,52 +497,45 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 .tl-tab.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .tl-stack{display:grid}
 .tl-body{grid-area:1/1}
+@media(max-width:768px){
+  .stage{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw)}
+}
 @media(max-width:760px){
-  .scene{width:94vw}
-  .scene-center{width:88vw}
+  :root{--page-pad:20px}
+  .stage-sticky{overflow:visible}
+  .scene{width:100%;max-width:100%;padding:0 var(--page-pad)}
+  .scene-center{width:100%;max-width:100%}
+  /* absolute scene cards ignore scene padding — match hero side inset */
+  .scene .merge-thread.tl-card{
+    width:min(428px,calc(100vw - 2 * var(--page-pad)));
+    max-width:min(428px,calc(100vw - 2 * var(--page-pad)))}
+  .scene .stage-triage{
+    width:min(430px,calc(100vw - 2 * var(--page-pad)));
+    max-width:min(430px,calc(100vw - 2 * var(--page-pad)))}
+  .scene .fin-wrap{
+    width:min(462px,calc(100vw - 2 * var(--page-pad)));
+    max-width:min(462px,calc(100vw - 2 * var(--page-pad)));
+    overflow:visible}
   /* calmer vertical rhythm on phones */
   .section{padding:84px 0}
   .converge-section{padding-bottom:0}
-  .hero{padding:34px 22px 76px}
+  .hero{padding:34px var(--page-pad) 76px}
   .hero-sub{margin-bottom:34px;max-width:100%;width:auto!important}
   .hero .card-shell,.hero .card{width:100%;max-width:520px}
   .lead{margin-top:18px}
   .side-text .st-msg .lead,.triage-cap .lead,.fin-cap .lead{margin-top:12px}
-  .side-text,.triage-cap,.fin-cap{bottom:6%;width:min(560px,92vw)}
-  /* clean-view beat: thread pings above the task card */
-  .fin-wrap{
-    display:grid;
-    grid-template-rows:auto auto;
-    align-content:start;
-    width:min(462px,94vw);
-    gap:10px;
-  }
-  .fin-threads{
-    position:relative;
-    inset:auto;
-    grid-row:1;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    margin:0;
-    padding:0 2px;
-    z-index:3;
-  }
-  .fin-msg{
-    position:relative;
-    left:auto!important;
-    right:auto!important;
-    top:auto!important;
-    flex-direction:row!important;
-    transform-origin:center center!important;
-    justify-content:flex-start;
-  }
-  .fin-msg--1{justify-content:flex-end}
-  .fin-card{grid-row:2;position:relative;z-index:2}
-  .fin-msg-bub{max-width:100%;width:100%;padding:8px 10px;font-size:.74rem}
-  .fin-msg-line{display:none}
+  .side-text,.triage-cap,.fin-cap{bottom:6%;width:100%;max-width:100%;
+    padding-left:var(--page-pad);padding-right:var(--page-pad);box-sizing:border-box}
+  .scene-center{padding-left:var(--page-pad);padding-right:var(--page-pad);box-sizing:border-box}
+  /* soft transparent halo — icons fade behind the headline */
+  .scene-center::before{
+    display:block;width:min(112vw,680px);height:min(62vh,460px);
+    border-radius:50%;filter:blur(28px);
+    background:radial-gradient(ellipse 100% 90% at 50% 50%,
+      var(--bg) 0%,rgba(239,231,214,.78) 36%,rgba(239,231,214,.3) 56%,transparent 76%)}
 }
 @media(max-width:560px){
+  :root{--page-pad:18px}
   .card{padding:28px 22px}
   .ex-list{padding:7px}
   .ex-item{padding:14px 12px}
@@ -836,6 +835,14 @@ html.light .confess-section .eyebrow,html.light .confess-section .lead{color:#8a
 /* depth halo: above orbiting icons, behind headline — only fades apps passing under the text */
 html.light .scene-center::before{display:block;left:50%;top:50%;transform:translate(-50%,-50%);width:min(58vw,540px);height:min(38vh,320px);z-index:-1;border-radius:0;pointer-events:none;
   background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.82) 0%,rgba(216,215,227,.48) 36%,rgba(228,227,235,.18) 58%,transparent 72%);filter:blur(16px)}
+@media(max-width:760px){
+  html.light .scene-center::before{
+    width:min(112vw,680px);height:min(62vh,460px);border-radius:50%;
+    background:radial-gradient(ellipse 100% 90% at 50% 50%,
+      rgba(216,215,227,.96) 0%,rgba(216,215,227,.68) 34%,
+      rgba(228,227,235,.3) 54%,rgba(239,238,245,.08) 68%,transparent 78%);
+    filter:blur(30px)}
+}
 html.light .side-text::before{width:min(110vw,720px);height:min(90vh,520px);border-radius:0;
   background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.5) 0%,rgba(216,215,227,.22) 46%,transparent 72%);filter:blur(14px)}
 html.light .card,html.light .triage,html.light .view-body,html.light .post,html.light .merge-thread,html.light .tl-card,html.light .confess-aside{box-shadow:0 30px 64px -40px rgba(33,30,24,.32)}
@@ -904,13 +911,14 @@ html.light .fbox .fcount{border-color:#FBF9F2}
 .fin-bar{height:4px;background:rgba(70,33,26,.10)}
 .fin-bar-fill{display:block;height:100%;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left center;will-change:transform}
 /* thread pings — messages arrive, then the matching row checks off */
-.fin-threads{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible}
+.fin-threads{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
 .fin-msg{position:absolute;display:flex;align-items:center;opacity:0;will-change:opacity,transform}
 .fin-msg--0{left:-6px;top:58px;flex-direction:row-reverse;transform-origin:right center}
 .fin-msg--1{right:-6px;top:118px;transform-origin:left center}
 .fin-msg--2{left:-6px;top:178px;flex-direction:row-reverse;transform-origin:right center}
-.fin-msg-line{display:block;width:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent));opacity:.45;transition:width .35s var(--ease)}
-.fin-msg--1 .fin-msg-line{background:linear-gradient(270deg,transparent,var(--accent))}
+.fin-msg-line{display:block;width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--accent));opacity:.45;
+  transform:scaleX(0);transform-origin:left center;will-change:transform}
+.fin-msg--1 .fin-msg-line{background:linear-gradient(270deg,transparent,var(--accent));transform-origin:right center}
 .fin-msg-bub{display:flex;align-items:center;gap:8px;max-width:min(200px,46vw);padding:8px 11px;border-radius:12px;
   background:var(--card);border:1px solid var(--line);box-shadow:0 10px 28px -16px rgba(33,30,24,.28);
   font-size:.78rem;line-height:1.35;color:var(--ink);position:relative}
@@ -929,6 +937,39 @@ html.light .fin-msg-bub{background:#FBF9F2;box-shadow:0 8px 22px -14px rgba(33,3
   .fin-msg--1{right:-204px;top:118px}
   .fin-msg--2{left:-204px;top:178px;flex-direction:row}
   .fin-msg-bub{max-width:196px}
+}
+/* mobile: notification pile above the task modal (must follow base .fin-threads rules) */
+@media(max-width:760px){
+  .scene .fin-wrap{
+    display:flex;flex-direction:column;align-items:stretch;gap:12px;
+    justify-content:flex-end}
+  .scene .fin-wrap .fin-threads{
+    position:relative;top:auto;right:auto;bottom:auto;left:auto;
+    inset:unset;width:100%;min-height:60px;flex:none;order:-1;
+    margin:0;padding:0;z-index:4;
+    pointer-events:none;overflow:visible}
+  .scene .fin-wrap .fin-msg,
+  .scene .fin-wrap .fin-msg--0,
+  .scene .fin-wrap .fin-msg--1,
+  .scene .fin-wrap .fin-msg--2{
+    position:absolute;bottom:0;left:0;right:0;top:auto!important;
+    flex-direction:row!important;justify-content:flex-start;
+    display:none;transform-origin:center bottom;width:100%}
+  .scene .fin-wrap .fin-msg--0{z-index:1}
+  .scene .fin-wrap .fin-msg--1{z-index:2}
+  .scene .fin-wrap .fin-msg--2{z-index:3}
+  .scene .fin-wrap .fin-msg-line{display:none}
+  .scene .fin-wrap .fin-msg-bub{width:100%;max-width:100%;font-size:.76rem;padding:10px 12px;
+    border-radius:16px;
+    box-shadow:0 14px 36px -14px rgba(33,30,24,.24),0 0 0 1px rgba(33,30,24,.07)}
+  html.light .scene .fin-wrap .fin-msg-bub{
+    box-shadow:0 12px 30px -12px rgba(33,30,24,.18),0 0 0 1px rgba(33,30,24,.08)}
+  .scene .fin-wrap .fin-msg .fin-spark{display:none}
+  .scene .fin-wrap .fin-card{
+    position:relative;z-index:2;flex:none;width:100%;
+    overflow:hidden;border-radius:18px}
+  .scene .fin-wrap .fin-head{padding:11px 14px}
+  .scene .fin-wrap .fin-bar{overflow:hidden;border-radius:0 0 17px 17px}
 }
 .fin-cap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(700px,92vw);text-align:center;z-index:5;opacity:0;pointer-events:none;will-change:opacity,transform}
 .fin-explore{margin:14px 0 0;font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);opacity:0;will-change:opacity}
@@ -991,9 +1032,9 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 
 /* ── outro lists: appear in a row beneath the parked headline (in the same pin) ── */
 .fin-lists{position:absolute;left:50%;top:59%;transform:translate(-50%,-50%);z-index:6;
-  width:min(1000px,94vw);display:flex;align-items:flex-start;gap:18px;opacity:0;will-change:transform,opacity}
+  width:min(980px,92vw);display:flex;align-items:flex-start;gap:18px;opacity:0;will-change:transform,opacity}
 .scene-footer{position:absolute;left:50%;bottom:max(16px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(1000px,92vw);z-index:6;
-  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px 18px;padding-top:16px;border-top:1px solid var(--line);
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px 18px;padding:16px var(--page-pad) 0;border-top:1px solid var(--line);
   font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
   opacity:0;pointer-events:none;will-change:opacity}
 .scene-footer a{color:inherit;text-decoration:none;pointer-events:auto}
@@ -1001,19 +1042,72 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 .scene-footer nav{display:flex;flex-wrap:wrap;gap:10px 16px;pointer-events:auto}
 .fin-lists .ex-card{margin:0;flex:1;min-width:0;width:auto}
 @media(max-width:760px){
-  /* swipe through the lists instead of stacking */
-  .fin-lists{top:60%;width:100%;max-width:100%;gap:14px;align-items:stretch;
+  /* outro: cap3 starts at bottom like other beats, rides up on scroll, cards swipe beneath */
+  #finCap3{z-index:7}
+  .fin-lists{top:58%;left:0;right:auto;width:100%;max-width:none;margin:0;transform:none;
+    gap:12px;align-items:flex-start;
     overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-    padding:2px 9vw 14px;scrollbar-width:none}
+    padding:0 var(--page-pad) 12px;scroll-padding-inline:var(--page-pad);scrollbar-width:none;
+    box-sizing:border-box}
   .fin-lists::-webkit-scrollbar{display:none}
-  .fin-lists .ex-card{flex:0 0 82vw;width:82vw;scroll-snap-align:center;box-shadow:0 6px 18px -8px rgba(33,30,24,.1)}
-  html.light .fin-lists .ex-card{box-shadow:0 5px 16px -8px rgba(33,30,24,.08)}
-  .scene-footer{bottom:max(12px,env(safe-area-inset-bottom,0px));width:88vw;padding-top:12px}
+  .fin-lists .ex-card{flex:0 0 calc(100% - 32px);width:calc(100% - 32px);
+    scroll-snap-align:start;align-self:flex-start;
+    border-radius:18px;border:1px solid var(--line);
+    box-shadow:0 6px 18px -8px rgba(33,30,24,.1)}
+  html.light .fin-lists .ex-card{box-shadow:0 6px 18px -8px rgba(33,30,24,.1)}
+  .fin-lists .ex-head{padding:11px 14px}
+  .fin-lists .ex-h-l,.fin-lists .ex-h-r{font-size:.56rem;letter-spacing:.12em}
+  .scene-footer{bottom:max(8px,env(safe-area-inset-bottom,0px));width:100%;max-width:100%;padding:10px var(--page-pad) 0;font-size:.58rem}
 }
+
+/* ── touch / iOS: native scroll, lighter layers, fewer concurrent animations ── */
+html.touch body{background-attachment:scroll}
+html.touch .grain{opacity:.05}
+html.ios .grain{display:none}
+html.touch .stage-sticky{
+  overflow:visible;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+html.touch .orbit{animation:none}
+html.touch .anode .ai{animation:none}
+html.touch .orbit .anode .ai{animation:appfloat-a 7s ease-in-out infinite}
+html.touch .orbit .anode:nth-child(3n+2) .ai{animation-name:appfloat-b;animation-duration:7.6s}
+html.touch .orbit .anode:nth-child(3n) .ai{animation-duration:6.4s}
+html.touch .anode .abub{animation:none}
+html.touch .ib-dot,
+html.touch .tg-dot,
+html.touch .inbox-ico .ib-dot.ok{animation:none}
+html.touch .fin-spark::before,
+html.touch .fin-spark::after{animation:none;opacity:0}
+html.touch .ucursor{filter:none}
+html.touch .orbit,
+html.touch .anode,
+html.touch .fin-wrap,
+html.touch .tl-card,
+html.touch .stage-triage,
+html.touch .stage-cleared,
+html.touch .fchip,
+html.touch .merge-thread .mr,
+html.touch .fin-item,
+html.touch .fin-msg,
+html.touch .tg-card,
+html.touch .scene-center,
+html.touch .side-text,
+html.touch .fin-cap,
+html.touch .fin-lists{will-change:auto}
+html.touch .scene{overflow:visible}
 
 </style>
 <link rel="stylesheet" href="/zali-loader.css">
-<script>(function(){try{var p=new URLSearchParams(location.search);var s=false;try{s=sessionStorage.getItem('zali_nav')==='1';}catch(_){}if(p.get('zali_nav')==='1'||s){document.documentElement.classList.add('zali-reveal');}}catch(_){}})();</script>
+<script>(function(){try{
+  var r=document.documentElement;
+  var touch=matchMedia('(hover:none) and (pointer:coarse)').matches||matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);
+  if(touch) r.classList.add('touch');
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)) r.classList.add('ios');
+  var p=new URLSearchParams(location.search);var s=false;try{s=sessionStorage.getItem('zali_nav')==='1';}catch(_){}
+  if(p.get('zali_nav')==='1'||s){r.classList.add('zali-reveal');}
+}catch(_){}})();</script>
 <link id="gfont-Playfair-Display" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&amp;display=swap">
 <link id="gfont-Righteous" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous:wght@300;400;500;600;700&amp;display=swap">
 <link id="gfont-Raleway" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&amp;display=swap">
@@ -1381,12 +1475,12 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 <script src="/cms-bridge.js" defer></script>
 <script src="https://unpkg.com/lenis@1.3.23/dist/lenis.min.js"></script>
 <script>
-/* Lenis smooth scroll — desktop only; native scroll on mobile avoids tug/jank */
+/* Lenis smooth scroll — mouse/desktop only; touch devices use native scroll (smoother on iOS) */
 (function(){
   if(!window.Lenis) return;
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var mobile=window.matchMedia('(max-width: 768px)').matches;
-  if(reduce||mobile) return;
+  var touch=matchMedia('(hover:none) and (pointer:coarse)').matches||matchMedia('(pointer:coarse)').matches;
+  if(reduce||touch) return;
   var lenis=new Lenis({
     autoRaf:true,
     autoToggle:true,
@@ -1500,6 +1594,10 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
   var card=document.getElementById('tlCard');
   if(stage&&scene&&card){
     var clamp=function(v){return v<0?0:v>1?1:v;};
+    var t3d=function(x,y,s){
+      var sc=s!==undefined?' scale('+s+')':'';
+      return 'translate3d('+(x||0)+'px,'+(y||0)+'px,0)'+sc;
+    };
     var orbit=document.getElementById('orbit');
     var sceneCenter=document.getElementById('sceneCenter');
     var sideText=document.getElementById('sideText');
@@ -1603,24 +1701,24 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 
       // beat segments
       var conv   = clamp((p-0.08)/0.14);   // apps spiral inward + fade
-      var cardIn = clamp((p-0.13)/0.12);   // timeline card materialises (centered)
-      var topT   = clamp((p-0.29)/0.13);   // explanatory text fades in at the bottom
-      var fun    = clamp((p-0.45)/0.15);   // conversations scatter + funnel into the inbox
-      var open   = clamp((p-0.62)/0.06);   // inbox is clicked → triage opens in place
-      var triA   = clamp((p-0.70)/0.22);   // the cards get triaged one by one
-      var clr    = clamp((p-0.88)/0.05);   // as the last card slides out: fade the box + show the cleared "done"
+      var cardIn = clamp((p-0.13)/0.10);   // timeline card materialises (centered)
+      var topT   = clamp((p-0.27)/0.11);   // explanatory text fades in at the bottom
+      var fun    = clamp((p-0.39)/0.14);   // conversations scatter + funnel into the inbox
+      var open   = clamp((p-0.56)/0.06);   // inbox is clicked → triage opens in place
+      var triA   = clamp((p-0.64)/0.22);   // the cards get triaged one by one
+      var clr    = clamp((p-0.84)/0.03);   // triage done → "all cleared" snaps in quickly
 
       // ── text beats: each line appears the instant the previous one clears ──
       var toolsTxt = 1 - clamp((p-0.10)/0.05);                                   // tools  → out by .15
-      var tlTxt    = clamp((p-0.16)/0.04) * (1 - clamp((p-0.42)/0.04));          // timeline .16–.46
-      var inTxt    = clamp((p-0.46)/0.04) * (1 - clamp((p-0.62)/0.04));          // inbox   .46–.66
-      var trTxt    = clamp((p-0.66)/0.04) * (1 - clamp((p-0.92)/0.04));          // triage  .66–.96
+      var tlTxt    = clamp((p-0.16)/0.04) * (1 - clamp((p-0.36)/0.04));          // timeline .16–.40 (shorter hold)
+      var inTxt    = clamp((p-0.40)/0.04) * (1 - clamp((p-0.56)/0.04));          // inbox   .40–.60
+      var trTxt    = clamp((p-0.60)/0.04) * (1 - clamp((p-0.86)/0.04));          // triage  .60–.90
 
       // apps converge into the centre
       orbit.style.setProperty('--conv', conv.toFixed(3));
       // mobile: gentle scroll parallax — icons drift up as you scroll into the tools beat
-      if(innerWidth<=640){
-        var drift=-clamp((p-0.02)/0.18)*10*(1-conv*0.85);
+      if(innerWidth<=760){
+        var drift=-clamp((p-0.02)/0.18)*12*(1-conv*0.85);
         orbit.style.setProperty('--drift',drift.toFixed(1)+'px');
       }else{ orbit.style.removeProperty('--drift'); }
       // as soon as they start spiralling in, pop + fade the message bubbles (absorbed into the timeline)
@@ -1629,7 +1727,7 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       // centred headline holds, then clears the instant the timeline line arrives
       if(sceneCenter){
         sceneCenter.style.opacity=clamp(toolsTxt).toFixed(3);
-        sceneCenter.style.transform='translate(-50%,-50%) translateY('+(-conv*20).toFixed(1)+'px) scale('+(1-conv*0.06).toFixed(3)+')';
+        sceneCenter.style.transform='translate3d(-50%,-50%,0) translate3d(0,'+(-conv*20).toFixed(1)+'px,0) scale('+(1-conv*0.06).toFixed(3)+')';
       }
 
       // card sits at the same fixed spot as triage / cleared / finale (no upward drift), then recedes into the funnel
@@ -1640,25 +1738,25 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 
       // unified rows land staggered as the card resolves
       rows.forEach(function(row,n){
-        var start=0.20+n*0.035, rp=clamp((p-start)/0.06);
+        var start=0.18+n*0.03, rp=clamp((p-start)/0.05);
         row.style.opacity=rp.toFixed(3);
-        row.style.transform='translateY('+((1-rp)*8).toFixed(1)+'px)';
+        row.style.transform='translate3d(0,'+((1-rp)*8).toFixed(1)+'px,0)';
       });
 
       // timeline line holds, then clears the instant the inbox line arrives
       if(sideText){
         sideText.style.opacity=tlTxt.toFixed(3);
-        sideText.style.transform='translateX(-50%) translateY('+((1-clamp((p-0.16)/0.04))*16).toFixed(1)+'px)';
+        sideText.style.transform='translate3d(-50%,'+((1-clamp((p-0.16)/0.04))*16).toFixed(1)+'px,0)';
       }
       // inbox line (same bottom spot), appears as the timeline line clears
       if(inboxCap){
         inboxCap.style.opacity=inTxt.toFixed(3);
-        inboxCap.style.transform='translateX(-50%) translateY('+((1-clamp((p-0.46)/0.04))*16).toFixed(1)+'px)';
+        inboxCap.style.transform='translate3d(-50%,'+((1-clamp((p-0.40)/0.04))*16).toFixed(1)+'px,0)';
       }
 
       // ── funnel finale: conversations scatter out, then get pulled into the one inbox ──
       if(funnelInbox){
-        var tap=clamp(1-Math.abs(p-0.605)/0.014);   // the click dip
+        var tap=clamp(1-Math.abs(p-0.565)/0.014);   // the click dip
         var inboxIn=clamp((fun-0.30)/0.10);          // items scatter out first; the inbox shows up just before they're pulled in
         funnelInbox.style.setProperty('--fin',(1-0.06*tap).toFixed(3));
         funnelInbox.style.setProperty('--finO',(inboxIn*(1-open)).toFixed(3));   // fades out as it opens into triage
@@ -1671,7 +1769,7 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
           var x=(sx*so)*(1-ex),  y=(sy*so)*(1-ex) + (-46)*ex; // converge up into the icon
           var sc=(0.5+so*0.5)*(1-ex*0.82);            // shrink right down as it's absorbed
           var op=clamp(so*1.6)*clamp(1-(fi-0.6)/0.3)*(1-open); // fade out as it lands / opens
-          c.style.transform='translate(-50%,-50%) translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale('+sc.toFixed(3)+')';
+          c.style.transform='translate3d(-50%,-50%,0) translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) scale('+sc.toFixed(3)+')';
           c.style.opacity=clamp(op).toFixed(3);
           if(fi>0.6) landed++;
         });
@@ -1686,20 +1784,20 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 
       // the cursor glides to the inbox and taps it open
       if(cursor){
-        var cShow=clamp((p-0.54)/0.04)*(1-clamp((p-0.655)/0.025));
+        var cShow=clamp((p-0.50)/0.04)*(1-clamp((p-0.615)/0.025));
         cursor.style.opacity=clamp(cShow).toFixed(3);
         if(fIco){
           var sr=scene.getBoundingClientRect(), ir=fIco.getBoundingClientRect();
           var cx=ir.left+ir.width*0.52-sr.left, cy=ir.top+ir.height*0.62-sr.top;
-          var tp=clamp(1-Math.abs(p-0.605)/0.014);
-          cursor.style.transform='translate('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px) scale('+(1-0.28*tp).toFixed(3)+')';
+          var tp=clamp(1-Math.abs(p-0.565)/0.014);
+          cursor.style.transform=t3d(cx,cy,(1-0.28*tp).toFixed(3));
         }
       }
 
       // ── triage opens in place; cards get triaged one by one as you scroll ──
       if(stageTriage){
         stageTriage.style.opacity=(open*(1-clr)).toFixed(3);
-        stageTriage.style.transform='translate(-50%,-50%) translateY(-82px) scale('+(0.92+open*0.08-clr*0.04).toFixed(3)+')';
+        stageTriage.style.transform='translate3d(-50%,-50%,0) translate3d(0,-82px,0) scale('+(0.92+open*0.08-clr*0.04).toFixed(3)+')';
         var N=tgCards.length, TW=0.40, TS=N>1?(0.86-TW)/(N-1):0;  // last card finishes ~triA .86, right as the clear begins
         var leave=tgCards.map(function(c,n){ return easeInOut(clamp((triA-n*TS)/TW)); });
         var t={task:0,draft:0,skip:0};
@@ -1709,7 +1807,7 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
           var dir=(TG[n].act==='skip')?-1:1;
           var tx=dir*150*lv, rot=dir*8*lv, ty=depth*8-lv*4, scl=1-depth*0.04;
           var op=clamp(1.8-depth*0.7)*(1-lv);
-          c.style.transform='translateX('+tx.toFixed(1)+'px) translateY('+ty.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg) scale('+scl.toFixed(3)+')';
+          c.style.transform='translate3d('+tx.toFixed(1)+'px,'+ty.toFixed(1)+'px,0) rotate('+rot.toFixed(1)+'deg) scale('+scl.toFixed(3)+')';
           c.style.opacity=op.toFixed(3);
           c.style.zIndex=20-n;
           if(lv>0.6) t[TG[n].act]++;
@@ -1723,15 +1821,15 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
         if(hot>=0&&btns[TG[hot].act]) btns[TG[hot].act].classList.add('hot');
       }
 
-      // cleared: the inbox returns green, holds, then opens into the task list (same pin)
-      var iOut=clamp((pf-0.03)/0.10);          // the green inbox opening away
-      var cIn=easeOut(clamp((pf-0.05)/0.13));  // the task card opening up in its place
+      // cleared: the inbox returns green, brief hold, then opens into the task list (same pin)
+      var iOut=clamp((pf-0.01)/0.05);          // green inbox exits faster
+      var cIn=easeOut(clamp((pf-0.02)/0.08));  // task card follows sooner
       if(stageCleared){
         stageCleared.style.opacity=(clr*(1-iOut)).toFixed(3);
-        stageCleared.style.transform='translate(-50%,-50%) translateY(-82px) scale('+(0.9+clr*0.1-iOut*0.22).toFixed(3)+')';
+        stageCleared.style.transform='translate3d(-50%,-50%,0) translate3d(0,-82px,0) scale('+(0.9+clr*0.1-iOut*0.22).toFixed(3)+')';
       }
       // keep the triage caption up through the clear / "all cleared" done beat — fade only as the task list opens
-      if(triageCap) triageCap.style.opacity=(clamp((p-0.66)/0.04)*(1-iOut)).toFixed(3);
+      if(triageCap) triageCap.style.opacity=(clamp((p-0.60)/0.04)*(1-iOut)).toFixed(3);
 
       // ── final stretch: last task checks → cap swap → card exits → lists open ──
       var out     = clamp((pf-0.62)/0.08);   // task card scrolls out only after the cap3 swap
@@ -1740,22 +1838,22 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 
       // the guided task list — lifts as it opens, then exits upward
       if(finWrap){
-        var finY=innerWidth<=760?-108:-82;
+        var finY=innerWidth<=760?-72:-82;
         finWrap.style.opacity=(cIn*(1-out)).toFixed(3);
-        finWrap.style.transform='translate(-50%,-50%) translateY('+(finY - out*sceneH*0.7).toFixed(1)+'px) scale('+(0.9+cIn*0.1-out*0.06).toFixed(3)+')';
+        finWrap.style.transform='translate3d(-50%,-50%,0) translate3d(0,'+(finY - out*sceneH*0.7).toFixed(1)+'px,0) scale('+(0.9+cIn*0.1-out*0.06).toFixed(3)+')';
         finWrap.style.pointerEvents=out>0.5?'none':'auto';
       }
-      var finGuide=clamp((pf-0.26)/0.38);   // thread messages arrive, then rows check off
-      var capLoop=clamp((pf-0.12)/0.03)*(1-clamp((pf-0.56)/0.04)); // "clean focused view" caption
-      var capMsgvis=clamp((pf-0.26)/0.03)*(1-clamp((pf-0.52)/0.04)); // thread pings during the loop phase
+      var finGuide=clamp((pf-0.20)/0.38);   // thread messages arrive, then rows check off
+      var capLoop=clamp((pf-0.08)/0.03)*(1-clamp((pf-0.52)/0.04)); // "clean focused view" caption
+      var capMsgvis=clamp((pf-0.20)/0.03)*(1-clamp((pf-0.48)/0.04)); // thread pings during the loop phase
       var finDone=0, finProgress=0;
       finItems.forEach(function(el,n){
-        var bin=easeOut(clamp((pf-0.12-n*0.05)/0.16));   // tasks land in, staggered
+        var bin=easeOut(clamp((pf-0.08-n*0.05)/0.16));   // tasks land in, staggered
         var thr=finGuide-n*0.24;
         var gp=clamp(thr/0.20);                           // this task's completion
         finProgress+=easeOut(gp);
         el.style.opacity=bin.toFixed(3);
-        el.style.transform='translateY('+((1-bin)*-14).toFixed(1)+'px)';
+        el.style.transform='translate3d(0,'+((1-bin)*-14).toFixed(1)+'px,0)';
         el.classList.toggle('done',gp>0.5);
         el.classList.toggle('focus',gp>0.06&&gp<0.94);
         el.classList.toggle('checking',gp>0.32&&gp<0.78);
@@ -1763,10 +1861,33 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
         var msg=finMsgs[n];
         if(msg){
           var msgIn=easeOut(clamp((thr-0.01)/0.07));
-          msg.style.opacity=(capMsgvis*msgIn).toFixed(3);
-          msg.style.transform='scale('+(0.9+msgIn*0.1).toFixed(3)+')';
+          if(innerWidth<=760){
+            var stackThr=n*0.22;
+            var pileDepth=(finN-1-n)*7;
+            var pileY=(-pileDepth).toFixed(1);
+            var pileScale=(1-(finN-1-n)*0.018).toFixed(3);
+            if(finGuide<stackThr-0.01){
+              msg.style.opacity='0';
+              msg.style.display='none';
+              msg.style.transform='translate3d(0,'+(parseFloat(pileY)-10)+'px,0) scale(0.94)';
+            }else{
+              var enter=easeOut(clamp((finGuide-stackThr)/0.05));
+              var msgOp=capMsgvis*(finGuide>stackThr+0.05?1:enter);
+              var drop=((1-enter)*-12).toFixed(1);
+              var settled=finGuide>stackThr+0.05;
+              var ty=settled?pileY:drop;
+              var sc=settled?pileScale:(0.94+enter*0.06).toFixed(3);
+              msg.style.opacity=clamp(msgOp).toFixed(3);
+              msg.style.display=msgOp>0.02?'flex':'none';
+              msg.style.transform='translate3d(0,'+ty+'px,0) scale('+sc+')';
+            }
+          }else{
+            msg.style.display='';
+            msg.style.opacity=(capMsgvis*msgIn).toFixed(3);
+            msg.style.transform='translate3d(0,0,0) scale('+(0.9+msgIn*0.1).toFixed(3)+')';
+          }
           var line=msg.querySelector('.fin-msg-line');
-          if(line) line.style.width=(msgIn*32).toFixed(0)+'px';
+          if(line) line.style.transform='scaleX('+msgIn.toFixed(3)+')';
           var spark=msg.querySelector('.fin-spark');
           if(spark) spark.style.opacity=(gp>0.38&&gp<0.82?0.9:0).toFixed(3);
         }
@@ -1780,13 +1901,26 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       // cap3 replaces cap2 once the last task is checked, then rides up as the card exits
       if(finCap3){
         finCap3.style.opacity=clamp((pf-0.58)/0.03).toFixed(3);
-        finCap3.style.transform='translateX(-50%) translateY('+(-out*sceneH*0.88).toFixed(1)+'px)';
+        var capRide=out*sceneH*(innerWidth<=760?0.82:0.88);
+        finCap3.style.transform='translate3d(-50%,'+(-capRide).toFixed(1)+'px,0)';
+        if(innerWidth<=760){
+          finCap3.style.top='';
+          finCap3.style.bottom='';
+        }
       }
       if(finExplore) finExplore.style.opacity=easeOut(clamp((listsIn-0.12)/0.38)).toFixed(3);
       // the three task lists open in a row beneath the parked headline
       if(finListsEl){
+        var listsTy=((1-listsIn)*22).toFixed(1);
         finListsEl.style.opacity=listsIn.toFixed(3);
-        finListsEl.style.transform='translate(-50%,-50%) translateY('+((1-listsIn)*22).toFixed(1)+'px)';
+        if(innerWidth<=760){
+          finListsEl.style.transform='translate3d(0,calc(-50% + '+listsTy+'px),0)';
+          finListsEl.style.left='';
+          finListsEl.style.right='';
+        }else{
+          finListsEl.style.transform='translate3d(-50%,-50%,0) translate3d(0,'+listsTy+'px,0)';
+          finListsEl.style.left='50%';
+        }
         finListsEl.style.pointerEvents=listsIn>0.6?'auto':'none';
       }
       if(finFooter) finFooter.style.opacity=listsIn.toFixed(3);
@@ -2033,10 +2167,10 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
     ];
     var SLOTS=[
       {left:'0%',top:'6px',rot:'-5deg',z:2},
-      {left:'22%',top:'16px',rot:'2deg',z:3},
-      {left:'44%',top:'2px',rot:'-1deg',z:1},
-      {left:'64%',top:'18px',rot:'4deg',z:4},
-      {left:'82%',top:'8px',rot:'-3deg',z:2}
+      {left:'20%',top:'16px',rot:'2deg',z:3},
+      {left:'40%',top:'2px',rot:'-1deg',z:1},
+      {left:'58%',top:'18px',rot:'4deg',z:4},
+      {left:'72%',top:'8px',rot:'-3deg',z:2}
     ];
     function clip(text,len){
       var s=(text||'').trim();
