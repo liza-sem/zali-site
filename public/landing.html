@@ -18,7 +18,7 @@
   font-display:swap;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:auto;max-width:100%}
+html{scroll-behavior:auto;max-width:100%;overflow-x:clip;overscroll-behavior-x:none}
 :root{
   /* ── vintage palette: warm aged paper, espresso ink, muted retro primaries ── */
   --bg:#EFE7D4; --card:#F7F0DE; --surface:rgba(58,45,28,.05);
@@ -244,7 +244,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 
 /* ── converge: a pinned scene — centered → timeline → push aside → by conversation ── */
-.stage{position:relative;height:620vh;margin-top:22px;--p:0;width:100vw;max-width:100vw;margin-left:calc(50% - 50vw)}
+.stage{position:relative;height:620vh;margin-top:22px;--p:0;width:100%;max-width:100%;margin-left:0}
 .stage-sticky{position:sticky;top:0;height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%);
   mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%)}
@@ -497,13 +497,11 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
 .tl-tab.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .tl-stack{display:grid}
 .tl-body{grid-area:1/1}
-@media(max-width:768px){
-  .stage{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw)}
-}
 @media(max-width:760px){
   :root{--page-pad:20px}
-  .stage-sticky{overflow:visible}
-  .scene{width:100%;max-width:100%;padding:0 var(--page-pad)}
+  .wrap{max-width:100%;width:100%}
+  .scene{width:100%;max-width:100%;padding:0 var(--page-pad);overflow-x:clip;overflow-y:visible}
+  .stage-sticky{overflow:hidden}
   .scene-center{width:100%;max-width:100%}
   /* absolute scene cards ignore scene padding — match hero side inset */
   .scene .merge-thread.tl-card{
@@ -529,7 +527,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   .scene-center{padding-left:var(--page-pad);padding-right:var(--page-pad);box-sizing:border-box}
   /* soft transparent halo — icons fade behind the headline */
   .scene-center::before{
-    display:block;width:min(112vw,680px);height:min(62vh,460px);
+    display:block;width:min(92vw,480px);height:min(62vh,460px);
     border-radius:50%;filter:blur(28px);
     background:radial-gradient(ellipse 100% 90% at 50% 50%,
       var(--bg) 0%,rgba(239,231,214,.78) 36%,rgba(239,231,214,.3) 56%,transparent 76%)}
@@ -837,7 +835,7 @@ html.light .scene-center::before{display:block;left:50%;top:50%;transform:transl
   background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.82) 0%,rgba(216,215,227,.48) 36%,rgba(228,227,235,.18) 58%,transparent 72%);filter:blur(16px)}
 @media(max-width:760px){
   html.light .scene-center::before{
-    width:min(112vw,680px);height:min(62vh,460px);border-radius:50%;
+    width:min(92vw,480px);height:min(62vh,460px);border-radius:50%;
     background:radial-gradient(ellipse 100% 90% at 50% 50%,
       rgba(216,215,227,.96) 0%,rgba(216,215,227,.68) 34%,
       rgba(228,227,235,.3) 54%,rgba(239,238,245,.08) 68%,transparent 78%);
@@ -1044,9 +1042,10 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 @media(max-width:760px){
   /* outro: cap3 starts at bottom like other beats, rides up on scroll, cards swipe beneath */
   #finCap3{z-index:7}
-  .fin-lists{top:58%;left:0;right:auto;width:100%;max-width:none;margin:0;transform:none;
+  .fin-lists{top:58%;left:0;right:0;width:100%;max-width:100%;margin:0;transform:none;
     gap:12px;align-items:flex-start;
     overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;touch-action:pan-x;
     padding:0 var(--page-pad) 12px;scroll-padding-inline:var(--page-pad);scrollbar-width:none;
     box-sizing:border-box}
   .fin-lists::-webkit-scrollbar{display:none}
@@ -1065,7 +1064,7 @@ html.touch body{background-attachment:scroll}
 html.touch .grain{opacity:.05}
 html.ios .grain{display:none}
 html.touch .stage-sticky{
-  overflow:visible;
+  overflow:hidden;
   -webkit-mask-image:none;
   mask-image:none;
 }
@@ -1096,7 +1095,7 @@ html.touch .scene-center,
 html.touch .side-text,
 html.touch .fin-cap,
 html.touch .fin-lists{will-change:auto}
-html.touch .scene{overflow:visible}
+html.touch .scene{overflow-x:clip;overflow-y:visible}
 
 </style>
 <link rel="stylesheet" href="/zali-loader.css">
