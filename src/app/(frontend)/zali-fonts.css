@@ -1,0 +1,16 @@
+@import url('/zali-loader.css');
+
+/* Logo wordmark — TenPoint_08_01_Comp.otf */
+@font-face {
+  font-family: 'TenPoint';
+  src: url('/TenPoint_08_01_Comp.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.zali-wordmark {
+  font-family: 'TenPoint', system-ui, sans-serif;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+}

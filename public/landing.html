@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zali — your interactions, turned into tasks (and actually done)</title>
+<meta name="description" content="Zali turns your emails, messages and tools into tasks — and actually helps you finish them. One less thing to remember. Join the waitlist." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Cardo:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/lenis@1.3.23/dist/lenis.css">
+<style>
+@font-face{
+  font-family:'TenPoint';
+  src:url('/TenPoint_08_01_Comp.otf') format('opentype');
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto}
+:root{
+  /* ── vintage palette: warm aged paper, espresso ink, muted retro primaries ── */
+  --bg:#EFE7D4; --card:#F7F0DE; --surface:rgba(58,45,28,.05);
+  --ink:#2C261D; --ink-2:#5e5544; --muted:#9c8e74; --faint:#c9bb9d;
+  --line:rgba(44,38,29,.14); --line-2:rgba(44,38,29,.07);
+  --accent:#324F86;             /* faded cobalt — the brand colour */
+  --peach:var(--accent); --apricot:var(--accent); --rose:var(--accent);
+  /* muted retro-primary set for the geometric shapes / numbering */
+  --c-red:#C0492E; --c-blue:#324F86; --c-olive:#7C7634; --c-mustard:#D49A33; --c-mauve:#977690; --c-teal:#3C7A72;
+  --c-pink:var(--c-mauve);
+  --over:#C0492E;               /* vintage vermillion — overdue / alert */
+  --ok:var(--accent);           /* active / on-track = the brand cobalt */
+  --sans:'Neue Haas Grotesk Display Pt','Neue Haas Grotesk','Helvetica Neue',Helvetica,Arial,'Space Grotesk',sans-serif;
+  --serif:var(--sans);          /* no serifs — accents render in grotesk */
+  --mono:'Space Mono',monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --loader-paper:#F7F0DE; --loader-ink:#211E18;
+}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;letter-spacing:-.005em;
+  background:
+    radial-gradient(115% 70% at 50% -12%, rgba(50,79,134,.07), transparent 58%),
+    radial-gradient(90% 60% at 100% 108%, rgba(192,73,46,.06), transparent 60%),
+    linear-gradient(180deg,#F2EBD9,#EBE1CB);
+  background-attachment:fixed;}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--ink);color:var(--card)}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.12;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 2 -0.5'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:300px}
+/* grain stays on the page canvas — panels sit above it */
+.card-shell,.card,.triage,.tl-card,.merge-thread,.fin-card,.fin-wrap,.ex-card,.view-body,.post,.thread,.tg-card,.tg-stack,.stage-triage,.confess-aside,.fbox,.inbox-ico,.fin-msg-bub,.ft-c{position:relative;z-index:2;isolation:isolate}
+.wrap{max-width:680px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+
+/* ── logo ── */
+.logo{display:flex;align-items:center;justify-content:center;gap:11px;padding:34px 0 0}
+.logo .mark{width:34px;height:34px;color:var(--ink);animation:bloom 14s var(--ease) infinite}
+.logo .name{font-family:'TenPoint',var(--sans);font-weight:normal;font-size:2.05rem;letter-spacing:.01em;line-height:1}
+@keyframes bloom{0%,100%{transform:rotate(0)}50%{transform:rotate(40deg) scale(1.06)}}
+
+/* ── hero ── */
+.hero{min-height:calc(100vh - 70px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0 60px;text-align:left}
+.hero-title{font-weight:600;font-size:clamp(1.95rem,5.2vw,3.1rem);line-height:1.05;letter-spacing:-.035em;text-align:center;max-width:620px;margin:0 auto 16px}
+.hero-sub{text-align:center;max-width:min(720px,92vw);margin:0 auto 30px;font-size:1.02rem;line-height:1.45;color:var(--ink-2);text-wrap:balance}
+.hero-meta{display:inline-flex;align-items:center;gap:10px;margin:0 auto 26px;font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.hero-meta .meta-sep{opacity:.55}
+.t-done{display:none;margin-top:12px;padding-top:14px;border-top:1px solid var(--line-2)}
+.t-done.show{display:block;animation:fadeup .5s var(--ease)}
+.t-done .td-h{font-family:var(--serif);font-style:italic;font-size:1.15rem;font-weight:500;color:var(--ink)}
+.t-done .td-s{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:3px}
+.card-shell{width:100%;max-width:520px;padding:5px;border-radius:23px;position:relative;
+  background:rgba(33,30,24,.11);border:none;
+  box-shadow:0 14px 42px -18px rgba(33,30,24,.16);
+  opacity:0;transform:translateY(24px) scale(.99);animation:cardin .8s var(--ease) .15s forwards}
+.card{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 30px 70px -34px rgba(70,33,26,.42);padding:30px 32px 28px;position:relative;overflow:hidden}
+.hero .card-shell{padding:0;background:transparent;box-shadow:none}
+.hero .card-shell .card{max-width:none;width:100%;background:linear-gradient(180deg,#fff 0%,#fffef8 100%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.92),0 8px 32px -8px rgba(255,255,255,.7),0 28px 72px -24px rgba(33,30,24,.12),0 0 110px -18px rgba(255,255,255,.5),inset 0 1px 0 rgba(255,255,255,.95);
+  border:none;opacity:1;transform:none;animation:none}
+/* hero task modal — bright, glowy first impression */
+.hero .card-shell{overflow:visible}
+.hero .card-shell::before{content:'';position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:calc(100% + 130px);height:calc(100% + 110px);z-index:-1;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(255,255,255,.75) 0%,rgba(255,255,255,.22) 44%,transparent 70%)}
+@keyframes cardin{to{opacity:1;transform:none}}
+@media(max-width:560px){.card{padding:26px 22px}.card-head{margin:-26px -22px 20px}}
+
+.meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:.62rem;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:22px}
+.clock{display:inline-flex;align-items:center;gap:7px}
+.clock .tick{width:6px;height:6px;border-radius:50%;background:var(--ink);animation:blink 2s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+
+.list-title{font-family:var(--sans);font-weight:600;font-size:clamp(1.4rem,4.2vw,1.75rem);line-height:1.08;letter-spacing:-.028em;margin-bottom:9px}
+.list-title em{font-family:var(--serif);font-style:italic;font-weight:400}
+.card-head{display:flex;align-items:center;gap:12px;margin:-30px -32px 22px;padding:11px 16px;
+  background:rgba(70,33,26,.06);border-bottom:1px solid var(--line);border-radius:0}
+.card-meta{display:inline-flex;align-items:center;gap:8px;margin-left:auto;font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);white-space:nowrap}
+.card-meta .meta-sep{opacity:.55}
+.due{font-family:var(--mono);font-weight:700;font-size:.6rem;text-transform:uppercase;letter-spacing:.11em;color:var(--ok);display:inline-flex;align-items:center;gap:7px;transition:color .3s var(--ease)}
+.due::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.due.over{color:var(--over)}
+.due.over::before{background:var(--over)}
+
+/* ── shake (nudge) ── */
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+.shake{animation:shake .42s var(--ease)}
+
+/* task list */
+.tasks{margin-top:4px}
+.task{display:flex;gap:13px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line-2)}
+.task:first-child{border-top:none;padding-top:2px}
+.task:last-child{padding-bottom:2px}
+.box{flex:none;width:21px;height:21px;border-radius:50%;border:2px solid var(--faint);margin-top:3px;position:relative;
+  cursor:pointer;background:none;padding:0;transition:.3s var(--ease)}
+.box:hover{border-color:var(--ink-2)}
+.box svg{position:absolute;inset:0;margin:auto;width:11px;height:11px;color:var(--card);opacity:0;transform:scale(.4);transition:.3s var(--ease)}
+.task.done .box{background:var(--ink);border-color:var(--ink)}
+.task.done .box svg{opacity:1;transform:scale(1)}
+.t-main{flex:1;min-width:0}
+.t-title{font-size:1.18rem;font-weight:600;letter-spacing:-.01em;line-height:1.22;position:relative;display:inline;
+  text-decoration:line-through;text-decoration-color:transparent;text-decoration-thickness:2px;
+  transition:color .4s var(--ease),text-decoration-color .45s var(--ease)}
+.task.done .t-title{color:var(--muted);text-decoration-color:var(--muted)}
+.caret{display:inline-block;width:2px;height:1.05em;background:var(--ink);vertical-align:-2px;margin-left:2px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.t-desc{margin-top:4px;font-size:.84rem;line-height:1.4;color:var(--muted)}
+.t-desc b{color:var(--ink-2);font-weight:500}
+.t-action{margin-top:12px}
+.task.done .t-action.collapsible{display:none}
+[data-key="share"].done .t-action{display:block}
+
+/* join form */
+.cardform{display:flex;gap:8px;flex-wrap:wrap}
+.field{flex:1;min-width:170px;font-family:var(--sans);font-size:.92rem;color:var(--ink);background:#fff;border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.field::placeholder{color:var(--faint)}
+.field:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(70,33,26,.08)}
+.signup{font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;border:none;cursor:pointer;background:var(--ink);
+  color:var(--card);border-radius:12px;padding:12px 22px;transition:transform .2s var(--ease),opacity .2s;white-space:nowrap}
+.signup:hover{transform:translateY(-1px);opacity:.93}
+
+/* share task */
+.share-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.64rem;letter-spacing:.04em;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:7px 12px;cursor:pointer;
+  transition:.18s var(--ease)}
+.share-btn:hover{border-color:var(--ink);transform:translateY(-1px)}
+.share-btn svg{width:12px;height:12px}
+.share-note{font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--over);margin-left:11px;white-space:nowrap}
+
+/* who chips */
+.who-chips{display:flex;flex-wrap:wrap;gap:7px}
+.who-chip{font-family:var(--sans);font-size:.72rem;font-weight:500;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);border-radius:999px;padding:6px 11px;cursor:pointer;transition:.16s var(--ease)}
+.who-chip:hover{border-color:var(--ink-2)}
+.who-chip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.who-line{margin-bottom:12px}
+
+/* confession task */
+.t-done .td-link{text-decoration:underline;text-underline-offset:2px}
+
+.done-msg{display:none;margin-top:6px;padding-top:18px;border-top:1px solid var(--line-2)}
+.done-msg.show{display:block;animation:fadeup .5s var(--ease)}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.done-msg .dm-h{font-family:var(--serif);font-style:italic;font-size:1.35rem;font-weight:500;margin-bottom:4px}
+.done-msg .dm-s{font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+
+.scrollcue{margin-top:34px;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.13em;
+  color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;opacity:1;cursor:pointer;background:none;border:none;font-weight:500}
+.scrollcue .arr{display:inline-block;animation:nudge 1.8s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+/* ── scroll content ── */
+.section{padding:80px 0;border-top:1px solid var(--line)}
+.converge-section{padding-bottom:0;border-top:none}
+.eyebrow{font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:9px}
+.eyebrow .n{color:var(--over)}
+.h2{font-family:var(--sans);font-weight:600;font-size:clamp(1.8rem,5vw,2.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance}
+.h2 em{font-family:var(--serif);font-style:italic;font-weight:400}
+.lead{font-size:1.05rem;color:var(--ink-2);margin-top:16px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:9px 15px;font-size:.88rem;font-weight:500}
+.chip .ci{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:.6rem;font-weight:700}
+.arrow-line{display:flex;align-items:center;gap:14px;margin-top:24px;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.arrow-line .to{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--faint) 0 5px,transparent 5px 10px);position:relative}
+.arrow-line .out{background:var(--ink);color:var(--card);padding:9px 15px;border-radius:999px}
+
+/* follow-through compare */
+.ft{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+@media(max-width:560px){.ft{grid-template-columns:1fr}}
+.ft-c{border:1px solid var(--line);border-radius:18px;padding:22px;background:var(--card)}
+.ft-c.bad{opacity:.85}
+.ft-c.good{border-color:var(--ink);background:linear-gradient(165deg,rgba(70,33,26,.05),var(--card))}
+.ft-k{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px}
+.ft-c h3{font-family:var(--serif);font-style:italic;font-size:1.3rem;font-weight:500;line-height:1.15}
+.ft-c p{font-size:.92rem;color:var(--ink-2);margin-top:8px}
+
+/* coming soon */
+.coming{margin-top:24px}
+.coming li{list-style:none;display:flex;align-items:center;gap:13px;padding:14px 0;border-top:1px solid var(--line-2);font-size:1.02rem}
+.coming li:first-child{border-top:none}
+.coming .dot{flex:none;width:18px;height:18px;border-radius:6px;border:2px dashed var(--faint)}
+.coming .soon{margin-left:auto;font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+.coming .live .dot{border:none;background:var(--ink);position:relative}
+.coming .live .dot::after{content:"";position:absolute;inset:0;margin:auto;width:9px;height:9px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fdfaf3' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/contain no-repeat}
+.coming .live .soon{color:var(--ink);border-color:var(--ink)}
+
+/* unified thread */
+.thread{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 24px 56px -30px rgba(70,33,26,.42)}
+.thread-head{display:flex;align-items:center;gap:13px;padding:17px 20px;border-bottom:1px solid var(--line-2)}
+.thread-head .ava{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--apricot),var(--rose));display:grid;place-items:center;font-weight:700;color:var(--ink);font-size:.95rem;flex:none}
+.thread-head .th-name{font-weight:600;font-size:1.04rem;letter-spacing:-.01em}
+.thread-head .th-meta{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:2px}
+.thread-head .th-pill{margin-left:auto;font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:999px;white-space:nowrap}
+.thread-body{padding:4px 20px 16px;position:relative}
+.thread-body::before{content:"";position:absolute;left:28px;top:16px;bottom:18px;width:1px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.tw{display:flex;gap:13px;padding:13px 0;border-top:1px solid var(--line-2)}
+.tw:first-child{border-top:none}
+.tw .src{flex:none;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.58rem;font-weight:700;margin-top:3px;position:relative;z-index:1;box-shadow:0 0 0 4px var(--card)}
+.tw .tw-body{flex:1;min-width:0}
+.tw .tw-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.tw .who{font-weight:600;font-size:.9rem}
+.tw .chan{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+.tw .when{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-left:auto}
+.tw .msg{font-size:.92rem;color:var(--ink-2);margin-top:3px}
+.tw .msg b{color:var(--ink);font-weight:600}
+
+/* mini final cta */
+.fcta{text-align:center;padding:80px 0 40px}
+.fcta h2{font-family:var(--sans);font-weight:600;font-size:clamp(2rem,6vw,3rem);letter-spacing:-.03em;line-height:1;margin-bottom:10px}
+.fcta h2 em{font-family:var(--serif);font-style:italic;font-weight:400}
+.fcta p{color:var(--ink-2);max-width:30rem;margin:0 auto 24px}
+.fcta form{display:flex;gap:9px;max-width:420px;margin:0 auto}
+footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+
+/* ── converge: a pinned scene — centered → timeline → push aside → by conversation ── */
+.stage{position:relative;height:540vh;margin-top:22px;--p:0;width:100vw;margin-left:calc(50% - 50vw)}
+.stage-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%)}
+.orbit{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;--R:clamp(176px,20vw,280px);--conv:0;
+  transform:translate(-50%,-50%) rotate(0deg);animation:spin 52s linear infinite}
+.anode{position:absolute;left:0;top:0;
+  transform:rotate(var(--ang)) translate(calc(var(--R) * (1 - var(--conv)))) rotate(calc(-1 * var(--ang)));
+  opacity:calc(1 - 1.05 * var(--conv));will-change:transform,opacity}
+/* apps that aren't part of the timeline: stay put and fade out early instead of being pulled in */
+.anode.aextra{transform:rotate(var(--ang)) translate(var(--R)) rotate(calc(-1 * var(--ang)));
+  opacity:calc(1 - 2.8 * var(--conv))}
+.anode .ai{display:grid;place-items:center;width:50px;height:50px;background:var(--card);border:1px solid var(--line);
+  border-radius:15px;padding:10px;box-shadow:0 16px 34px -22px rgba(70,33,26,.5);
+  transform:translate(-50%,-50%);animation:spin-rev 52s linear infinite}
+.anode .ai .ic{width:100%;height:100%;object-fit:contain;display:block}
+.anode .ci{width:21px;height:21px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:700;flex:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes spin-rev{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
+@keyframes appfloat-a{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
+@keyframes appfloat-b{0%,100%{transform:translate(-50%,-50%) translate(0,0)}50%{transform:translate(-50%,-50%) translate(4px,-5px)}}
+/* mobile: scattered ring with gentle float — pulls to centre on scroll */
+@media(max-width:640px){
+  .orbit{animation:none;--scatter-x:1.1;--scatter-y:1.06;transform:translate(-50%,-50%) translateY(var(--drift,0px))}
+  .anode{transform:translate(calc(var(--sx,0px) * var(--scatter-x) * (1 - var(--conv))), calc(var(--sy,0px) * var(--scatter-y) * (1 - var(--conv))))}
+  .anode.aextra{transform:translate(calc(var(--sx,0px) * 1.14), calc(var(--sy,0px) * 1.08))}
+  .anode .ai{width:44px;height:44px;padding:9px;border-radius:13px;animation:appfloat-a 5.4s ease-in-out infinite}
+  .anode:nth-child(3n+1) .ai{animation-duration:5.8s;animation-delay:-1.4s}
+  .anode:nth-child(3n+2) .ai{animation-name:appfloat-b;animation-duration:6.4s;animation-delay:-2.6s}
+  .anode:nth-child(3n) .ai{animation-duration:5.1s;animation-delay:-.6s}
+  .orbit.converging .anode .ai{animation-play-state:paused}
+  .anode .abub{white-space:normal;max-width:min(132px,36vw);font-size:.58rem;line-height:1.35;padding:6px 9px;
+    text-align:center;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+}
+
+.merge-thread{position:relative;width:100%;max-width:432px;z-index:4;background:var(--card);border:1px solid var(--line);
+  border-radius:20px;overflow:hidden;box-shadow:0 30px 64px -30px rgba(70,33,26,.5);
+  opacity:0;transform:translateY(16px) scale(.97);will-change:transform,opacity}
+.merge-thread .mh{display:flex;align-items:center;gap:11px;padding:14px 18px;border-bottom:1px solid var(--line-2)}
+.merge-thread .mh .ava{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--apricot),var(--rose));display:grid;place-items:center;font-weight:700;color:var(--ink);font-size:.9rem;flex:none}
+.merge-thread .mh .nm{font-weight:600;font-size:.98rem;letter-spacing:-.01em}
+.merge-thread .mh .mt{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:2px}
+.merge-thread .mh .mpill{margin-left:auto;font-family:var(--mono);font-size:.52rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:999px}
+.merge-body{padding:2px 18px 12px;position:relative}
+.merge-body::before{content:"";position:absolute;left:26px;top:12px;bottom:14px;width:1px;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.merge-thread .mr{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line-2);align-items:flex-start;opacity:0;will-change:opacity,transform}
+.merge-thread .mr:first-child{border-top:none}
+.merge-thread .mr .src{flex:none;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.56rem;font-weight:700;margin-top:2px;position:relative;z-index:1;box-shadow:0 0 0 4px var(--card)}
+.merge-thread .mr .mw-wrap{flex:1;min-width:0}
+.merge-thread .mr .mtop{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.merge-thread .mr .mw{font-weight:600;font-size:.85rem}
+.merge-thread .mr .mchan{font-family:var(--mono);font-size:.5rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+.merge-thread .mr .mwhen{font-family:var(--mono);font-size:.54rem;color:var(--muted);margin-left:auto}
+.merge-thread .mr .mx{font-size:.85rem;color:var(--ink-2);margin-top:2px;width:100%}
+.stage-cap{position:absolute;left:0;right:0;bottom:-30px;text-align:center;font-family:var(--mono);font-size:.6rem;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted);opacity:0;will-change:opacity}
+
+/* ── funnel finale: conversations scatter out of the timeline, then pour into one inbox ── */
+.funnel{position:absolute;inset:0;z-index:5;pointer-events:none}
+.funnel-inbox{position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%) scale(var(--fin,.62));opacity:var(--finO,0);
+  display:flex;flex-direction:column;align-items:center;gap:20px;will-change:transform,opacity}
+.fbox{position:relative;width:100px;height:100px;border-radius:26px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;box-shadow:0 34px 64px -28px rgba(0,0,0,.6)}
+.fbox svg{width:44px;height:44px;color:var(--ink)}
+.fbox .fcount{position:absolute;top:-13px;right:-13px;min-width:32px;height:32px;padding:0 8px;border-radius:999px;
+  background:var(--over);color:#fff;font-family:var(--mono);font-weight:700;font-size:.84rem;display:grid;place-items:center;
+  border:3px solid #0D0C0A}
+.fbox .fcount.pop{animation:fpop .42s var(--ease)}
+@keyframes fpop{0%{transform:scale(1)}42%{transform:scale(1.34)}100%{transform:scale(1)}}
+/* the inbox the conversations funnel into — matches the cleared inbox at the end */
+.inbox-ico.f-ico{width:84px;height:84px;border-radius:23px}
+.inbox-ico.f-ico svg{width:40px;height:40px}
+.inbox-ico.f-ico .ib-dot{top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;font-size:.6rem;transition:opacity .25s var(--ease)}
+.inbox-ico.f-ico .ib-dot.pop{animation:fpop .4s var(--ease)}
+.funnel-text{text-align:center;max-width:300px;opacity:var(--ftO,0);
+  transform:translateY(calc((1 - var(--ftO,0)) * 12px));will-change:transform,opacity}
+.funnel-text b{display:block;font-family:var(--sans);font-weight:600;font-size:1.12rem;letter-spacing:-.015em;color:#F4EEDD;margin-bottom:7px}
+.funnel-text span{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;font-size:.62rem;color:#a39a88;line-height:1.7}
+.fchip{position:absolute;left:50%;top:50%;display:flex;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px 6px 7px;
+  font-size:.78rem;font-weight:500;white-space:nowrap;box-shadow:0 18px 32px -20px rgba(0,0,0,.55);
+  opacity:0;will-change:transform,opacity}
+.fchip .fci{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;color:#fff;font-size:.6rem;font-weight:700;flex:none}
+
+/* ── spine: the line that runs timeline → views → triage ── */
+.spine{width:1px;height:52px;margin:2px auto;background:repeating-linear-gradient(var(--line) 0 5px,transparent 5px 10px);position:relative}
+.spine.short{height:38px}
+.spine::after{content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.spine.top::before{content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--ink);opacity:.35}
+
+/* ── interactive triage ── */
+.inbox-lead{display:flex;align-items:center;gap:15px;margin-bottom:22px}
+.inbox-ico{position:relative;width:46px;height:46px;border-radius:13px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;box-shadow:0 14px 30px -20px rgba(70,33,26,.5);flex:none}
+.inbox-ico svg{width:22px;height:22px;color:var(--ink)}
+.inbox-ico .ib-dot{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#e0492f;color:#fff;font-family:var(--mono);font-size:.6rem;font-weight:700;display:grid;place-items:center;animation:ibpulse 2.6s var(--ease) infinite}
+.inbox-cap{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);line-height:1.65}
+.inbox-cap b{color:var(--ink-2);font-weight:600}
+.tg-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e0492f;margin-left:5px;vertical-align:middle;animation:ibpulse 2.6s var(--ease) infinite}
+@keyframes ibpulse{0%{box-shadow:0 0 0 0 rgba(224,73,47,.5)}70%{box-shadow:0 0 0 9px rgba(224,73,47,0)}100%{box-shadow:0 0 0 0 rgba(224,73,47,0)}}
+.triage{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:20px 20px 22px;box-shadow:0 24px 56px -32px rgba(70,33,26,.42)}
+.tg-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tg-bar .tg-l{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.tg-bar .tg-count{font-family:var(--mono);font-size:.58rem;color:var(--ink)}
+.tg-stack{position:relative;height:118px}
+.tg-card{position:absolute;inset:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+  display:flex;gap:12px;align-items:flex-start;transition:transform .45s var(--ease),opacity .45s var(--ease);transform-origin:center}
+.tg-card .src{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff;font-size:.6rem;font-weight:700;margin-top:2px}
+.tg-card .tc-who{font-weight:600;font-size:.92rem}
+.tg-card .tc-chan{font-family:var(--mono);font-size:.52rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-left:7px}
+.tg-card .tc-msg{font-size:.92rem;color:var(--ink-2);margin-top:3px}
+.tg-card.gone-l{transform:translateX(-130%) rotate(-7deg);opacity:0}
+.tg-card.gone-r{transform:translateX(130%) rotate(7deg);opacity:0}
+.tg-card.gone-d{transform:translateY(40px) scale(.9);opacity:0}
+.tg-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.tg-empty.show{opacity:1}
+.tg-empty .te-h{font-family:var(--serif);font-style:italic;font-size:1.3rem;font-weight:500}
+.tg-empty .te-s{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:5px}
+.tg-actions{display:flex;align-items:stretch;gap:8px;margin-top:16px}
+.tg-btn{flex:1;display:grid;place-items:center;text-align:center;box-sizing:border-box;
+  font-family:var(--mono);font-size:.62rem;line-height:1;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:0 10px;height:40px;
+  transition:.18s var(--ease)}
+.tg-btn-in{display:inline-flex;align-items:center;justify-content:center;gap:5px;line-height:1;font:inherit;
+  letter-spacing:inherit;text-transform:inherit;color:inherit}
+.tg-arr{display:inline-block;line-height:1;font-size:.95em;transform:translateY(.5px)}
+.tg-btn:hover{transform:translateY(-1px)}
+.tg-btn.task{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tg-btn.task:hover{filter:brightness(1.06)}
+.tg-btn.draft{background:rgba(50,79,134,.1);color:var(--accent);border-color:rgba(50,79,134,.28)}
+.tg-btn.draft:hover{border-color:var(--accent)}
+.tg-btn.skip{background:rgba(124,118,52,.1);color:var(--c-olive);border-color:rgba(124,118,52,.3)}
+.tg-btn.skip:hover{border-color:var(--c-olive)}
+.tg-btn:disabled{opacity:.4;cursor:default;transform:none}
+.tg-tally{display:flex;gap:18px;margin-top:14px;font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tg-tally b{color:var(--ink);font-weight:700}
+
+/* ── views: one timeline, sliced ── */
+.views{margin-top:28px}
+.view-tabs{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.vt{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;border:1px solid var(--line);
+  background:var(--card);color:var(--ink-2);border-radius:999px;padding:8px 14px;cursor:pointer;transition:.16s var(--ease)}
+.vt:hover{border-color:var(--ink-2)}
+.vt.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.view-body{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 24px 56px -34px rgba(70,33,26,.42)}
+.view-body .vfade{animation:fadeup .4s var(--ease)}
+.vgroup{padding:14px 18px;border-top:1px solid var(--line-2)}
+.vgroup:first-child{border-top:none}
+.vg-h{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:.56rem;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.vg-h .vg-n{margin-left:auto;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.vrow{display:flex;gap:11px;align-items:center;padding:6px 0}
+.vrow .src{flex:none;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.55rem;font-weight:700}
+.vrow .vw{font-weight:600;font-size:.85rem}
+.vrow .vx{font-size:.85rem;color:var(--ink-2)}
+.vrow .vchk{flex:none;width:17px;height:17px;border-radius:50%;border:2px solid var(--faint)}
+.vrow.done .vchk{background:var(--ink);border-color:var(--ink)}
+.vrow.done .vx{color:var(--muted);text-decoration:line-through}
+.view-cap{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-top:12px;text-align:center}
+
+/* ── public task confessions ── */
+.confess{margin-top:24px}
+.confess-form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.confess-form .field{min-width:200px}
+.confess-meta{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:16px}
+.confess-meta b{color:var(--ink)}
+.wall{display:flex;flex-direction:column;gap:10px;max-height:430px;overflow:hidden;position:relative;
+  -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.cf{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+.cf.mine{border-color:var(--ink);background:linear-gradient(165deg,rgba(70,33,26,.05),var(--card))}
+.cf .cbox{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);margin-top:1px;position:relative;transition:.4s var(--ease)}
+.cf .cbox svg{position:absolute;inset:0;margin:auto;width:11px;height:11px;color:var(--card);opacity:0;transform:scale(.4);transition:.3s var(--ease)}
+.cf.done .cbox{background:var(--ink);border-color:var(--ink)}
+.cf.done .cbox svg{opacity:1;transform:scale(1)}
+.cf .cf-b{flex:1;min-width:0}
+.cf .cf-t{font-size:.92rem;color:var(--ink);line-height:1.3}
+.cf.done .cf-t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint)}
+.cf .cf-m{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-top:5px}
+.cf.done .cf-m{color:var(--over)}
+.cf-new{animation:cfin .5s var(--ease)}
+@keyframes cfin{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+
+/* confessions teaser (distinct aside → full page) */
+.confess-aside{margin-top:22px;border:1px dashed var(--faint);border-radius:20px;padding:20px;background:rgba(253,250,243,.45)}
+.ca-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.ca-k{font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ca-c{font-size:1.05rem;font-weight:600;margin-top:4px;letter-spacing:-.01em}
+.ca-c b{font-variant-numeric:tabular-nums}
+.ca-go{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--ink);
+  border-radius:999px;padding:10px 16px;white-space:nowrap;transition:.18s var(--ease)}
+.ca-go:hover{background:var(--ink);color:var(--card)}
+.ca-peek{display:flex;flex-direction:column;gap:10px}
+.ca-add{display:inline-block;margin-top:15px;font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.ca-add:hover{color:var(--ink);border-color:var(--ink)}
+
+/* ── task confessions: distinct "booth" band + faded list ── */
+.confess-section{position:relative;width:100vw;margin-left:calc(50% - 50vw);padding:78px 0;
+  background:radial-gradient(135% 95% at 50% -8%, #3a1c14, #271410 72%);color:#efe3d4}
+.confess-section::before,.confess-section::after{content:"";position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.06)}
+.confess-section::before{top:0}.confess-section::after{bottom:0}
+.conf-inner{max-width:680px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.confess-section .eyebrow{color:#c7a78c}
+.confess-section .eyebrow .n{color:#ee9f7b}
+.confess-section .h2{color:#f6ece0}
+.confess-section .h2 em{color:#f1d8bf}
+.confess-section .lead{color:#d6bfab}
+.confess-list{margin-top:24px;display:flex;flex-direction:column;gap:10px;max-height:336px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 58%,transparent);mask-image:linear-gradient(180deg,#000 58%,transparent)}
+.confess-cta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;flex-wrap:wrap}
+.cc-count{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#c7a78c}
+.cc-count b{color:#fff;font-variant-numeric:tabular-nums}
+.confess-section .ca-go{border-color:#efe3d4;color:#efe3d4;background:transparent;
+  font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;border-radius:999px;padding:11px 18px;
+  border-style:solid;border-width:1px;transition:.18s var(--ease)}
+.confess-section .ca-go:hover{background:#efe3d4;color:#271410}
+
+/* cta done */
+.cta-done{display:none;max-width:420px;margin:0 auto;font-family:var(--serif);font-style:italic;font-size:1.25rem;color:var(--ink)}
+.cta-done.show{display:block;animation:fadeup .5s var(--ease)}
+
+.reveal{opacity:0;transform:translateY(22px);transition:.7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.card-shell{opacity:1;transform:none;animation:none}.card{opacity:1;transform:none;animation:none}.logo .mark,.clock .tick,.scrollcue .arr,.anode .ai,.orbit{animation:none}.anode .abub{animation:none;opacity:1;transform:translateX(-50%)}.orbit{--drift:0px!important}.fin-spark::before,.fin-spark::after{animation:none;opacity:.5}}
+
+/* ── converge scene: centered headline, then a card that slides aside ── */
+.scene{position:relative;width:min(980px,92vw);height:min(72vh,560px);margin:0 auto}
+.scene-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:min(440px,86vw);text-align:center;pointer-events:none;will-change:opacity,transform;isolation:isolate}
+.scene-center::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:165%;height:230%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side, var(--bg) 42%, rgba(239,231,214,.72) 62%, transparent 82%);filter:blur(3px)}
+.scene-center .h2{margin:0}
+.scene-center .lead{margin:13px 0 0;color:var(--ink-2)}
+.side-text{position:absolute;left:50%;top:auto;bottom:3%;transform:translateX(-50%);width:min(700px,92vw);display:grid;z-index:6;opacity:0;pointer-events:none;text-align:center;will-change:opacity,transform}
+.side-text::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:128%;height:180%;z-index:-1;border-radius:28px;background:radial-gradient(closest-side, var(--bg) 50%, transparent 88%);filter:blur(4px)}
+.side-text .st-msg{grid-area:1/1}
+.side-text .st-msg .h2{margin:0}
+.side-text .st-msg .lead{margin:9px 0 0;font-size:.98rem;color:var(--ink-2)}
+.tl-card{position:absolute;top:50%;left:50%;width:428px;max-width:88vw;z-index:4;
+  transform:translate(calc(-50% + var(--cardX,0px)), calc(-50% + var(--cardY,0px))) scale(var(--cardScale,.97));
+  will-change:transform,opacity}
+.tl-tabs{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.tl-tab{font-family:var(--mono);font-size:.52rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 11px;transition:background .35s var(--ease),color .35s var(--ease),border-color .35s var(--ease)}
+.tl-tab.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.tl-stack{display:grid}
+.tl-body{grid-area:1/1}
+@media(max-width:760px){
+  .scene{width:94vw}
+  .scene-center{width:88vw}
+  /* calmer vertical rhythm on phones */
+  .section{padding:84px 0}
+  .converge-section{padding-bottom:0}
+  .hero{padding:34px 22px 76px}
+  .hero-sub{margin-bottom:34px;max-width:100%;width:auto!important}
+  .hero .card-shell,.hero .card{width:100%;max-width:520px}
+  .lead{margin-top:18px}
+  .side-text .st-msg .lead,.triage-cap .lead,.fin-cap .lead{margin-top:12px}
+  .side-text,.triage-cap,.fin-cap{bottom:6%;width:min(560px,92vw)}
+}
+@media(max-width:560px){
+  .card{padding:28px 22px}
+  .ex-list{padding:7px}
+  .ex-item{padding:14px 12px}
+  .fin-item{padding:13px 11px}
+  .fin-msg--0{left:4px;top:52px}
+  .fin-msg--1{right:4px;top:112px}
+  .fin-msg--2{left:4px;top:172px}
+  .fin-msg-bub{max-width:min(168px,44vw);padding:7px 9px;font-size:.72rem}
+  .fin-msg-line{display:none}
+}
+
+/* ── confessions: pilled marquee ── */
+.confess-marquee{margin:20px 0 4px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.cm-row{display:flex;gap:10px;width:max-content;animation:cmarq 64s linear infinite}
+.cm-row.rev{margin-top:10px;animation-duration:80s;animation-direction:reverse}
+.confess-marquee:hover .cm-row{animation-play-state:paused}
+.cm-pill{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:9px 16px;font-size:.88rem;color:var(--ink-2)}
+.cm-pill .cdot{flex:none;width:15px;height:15px;border-radius:50%;border:2px solid var(--faint);position:relative}
+.cm-pill.done{color:var(--muted)}
+.cm-pill.done .cdot{background:var(--ink);border-color:var(--ink)}
+.cm-pill.done .cdot::after{content:"";position:absolute;inset:0;margin:auto;width:7px;height:7px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fdfaf3' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/contain no-repeat}
+@keyframes cmarq{to{transform:translateX(-50%)}}
+
+/* ── posts: media feed ── */
+.feed{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+@media(max-width:640px){.feed{grid-template-columns:1fr}}
+.post{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 14px 32px -24px rgba(70,33,26,.45);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.post:hover{transform:translateY(-3px);box-shadow:0 22px 44px -26px rgba(70,33,26,.5)}
+.post .ph{aspect-ratio:16/10;display:grid;place-items:center;border-bottom:1px solid var(--line-2);
+  background:repeating-linear-gradient(45deg,rgba(242,199,158,.5) 0 9px,rgba(253,250,243,.7) 9px 18px)}
+.post .ph span{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);
+  background:var(--card);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+.post .pb{padding:15px 16px 17px}
+.post .pk{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.08em;color:var(--over);margin-bottom:8px}
+.post h3{font-size:1rem;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.post p{font-size:.85rem;color:var(--ink-2);margin-top:6px;line-height:1.45}
+.post .pm{font-family:var(--mono);font-size:.54rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:11px}
+
+/* ── final CTA: share + who after signup ── */
+.cta-done .cd-h{font-family:var(--serif);font-style:italic;font-size:1.25rem;color:var(--ink);margin-bottom:16px}
+.cta-done .cd-row{display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:14px}
+.cta-done .cd-who{justify-content:center}
+
+/* ============================================================
+   CLEAN BRAND LAYER — airy, soft, grotesk+mono, no gradients,
+   faint borders, small radii, gentle shadows
+   ============================================================ */
+::selection{background:var(--accent);color:#fff}
+
+/* type: no italics/serif accents → grotesk; brand colour on highlight words */
+.t-done .td-h,.done-msg .dm-h,.ft-c h3,.tg-empty .te-h,.cta-done,.cta-done .cd-h,
+.h2 em,.list-title em,.fcta h2 em{font-style:normal}
+.h2 em,.list-title em,.fcta h2 em{color:var(--accent)}
+.hero-title,.h2,.fcta h2,.list-title{letter-spacing:-.035em}
+.logo .name{font-weight:normal;letter-spacing:.01em}
+
+/* small, soft radii (no hard corners, no big bubbles) */
+.card{border-radius:18px}
+.thread,.triage,.view-body,.merge-thread,.post,.ft-c,.confess-aside{border-radius:14px}
+.inbox-ico,.tg-card{border-radius:12px}
+.field,.signup,.share-btn,.tg-btn,.ca-go{border-radius:10px}
+.anode .ci,.tw .src,.merge-thread .mr .src,.tg-card .src,.vrow .src,.chip .ci{border-radius:6px}
+.who-chip,.chip,.vt,.tl-tab,.cm-pill,.coming .soon,.thread-head .th-pill,
+.merge-thread .mh .mpill,.vg-h .vg-n,.post .ph span{border-radius:999px}
+.box,.cf .cbox,.vrow .vchk,.cm-pill .cdot,.coming .dot,.inbox-ico .ib-dot,.tg-dot{border-radius:50%}
+
+/* borders: crisp hairlines do the work now (de-embossed, flat paper) */
+.card,.thread,.triage,.view-body,.merge-thread,.post,.ft-c,.inbox-ico,.confess-aside,.tg-card,.anode .ai{border:1px solid var(--line)}
+.field{border:1px solid var(--line)}
+/* chips/tags: soft neutral fill, no border */
+.who-chip,.chip,.vt,.tl-tab,.cm-pill,.share-btn,.coming .soon,
+.thread-head .th-pill,.merge-thread .mh .mpill,.vg-h .vg-n{background:var(--surface);border:none;color:var(--ink-2)}
+.ca-go{border:1px solid var(--line);background:transparent}
+
+/* de-embossed: flat surfaces, just the faintest lift on the main card */
+.card{box-shadow:0 8px 20px -18px rgba(44,38,29,.4)}
+.thread,.triage,.view-body,.merge-thread,.post,.ft-c,.confess-aside,.inbox-ico,.tg-card,.anode .ai{box-shadow:none}
+.post:hover{box-shadow:0 10px 22px -18px rgba(44,38,29,.32)}
+.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(50,79,134,.15)}
+
+/* checkboxes: circular (like the app), filled with brand ink when done */
+.box,.cf .cbox,.vrow .vchk{border:2px solid var(--faint)}
+.task.done .box,.cf.done .cbox,.vrow.done .vchk,.cm-pill.done .cdot{background:var(--ink);border-color:var(--ink)}
+
+/* flatten every gradient fill to a solid */
+.thread-head .ava,.merge-thread .mh .ava{background:var(--accent);color:#fff}
+.ft-c.good,.cf.mine{background:var(--card);border-color:var(--line)}
+.scene-center::before,.side-text::before{background:var(--bg);filter:none}
+.post .ph{background:var(--surface)}
+/* tools keep their real brand colours (inline gradients win; ink only as fallback) */
+.anode .ci,.tw .src,.merge-thread .mr .src,.tg-card .src,.vrow .src,.chip .ci{background:var(--ink);color:#fff}
+
+/* notification bubbles: the real messages ping sporadically while the tools orbit */
+.anode .ai{position:relative}
+.anode .abub{position:absolute;bottom:calc(100% + 9px);left:50%;display:inline-block;white-space:nowrap;
+  background:#DCEAF6;color:#27384f;border:1px solid rgba(50,79,134,.22);border-radius:13px;padding:6px 11px;
+  font-family:var(--sans);font-size:.66rem;font-weight:500;line-height:1;box-shadow:0 14px 30px -16px rgba(20,40,70,.45);
+  opacity:0;transform:translateX(-50%) scale(.9);will-change:opacity,transform;animation:bubpop 7s var(--ease) infinite;
+  box-sizing:border-box;max-width:min(220px,52vw)}
+.anode .abub::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#DCEAF6}
+.anode:nth-child(even) .abub{bottom:auto;top:calc(100% + 9px)}
+.anode:nth-child(even) .abub::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#DCEAF6}
+@keyframes bubpop{
+  0%,3%{opacity:0;transform:translateX(-50%) translateY(5px) scale(.9)}
+  9%,24%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  34%,100%{opacity:0;transform:translateX(-50%) translateY(-3px) scale(.95)}
+}
+/* negative delays spread across each cycle → they're already out of phase, so some appear while others vanish */
+.anode:nth-child(1) .abub{animation-duration:6.3s;animation-delay:-.5s}
+.anode:nth-child(2) .abub{animation-duration:8.1s;animation-delay:-3.0s}
+.anode:nth-child(3) .abub{animation-duration:7.2s;animation-delay:-5.4s}
+.anode:nth-child(4) .abub{animation-duration:9.4s;animation-delay:-1.6s}
+.anode:nth-child(5) .abub{animation-duration:6.7s;animation-delay:-4.1s}
+.anode:nth-child(6) .abub{animation-duration:8.6s;animation-delay:-6.5s}
+.anode:nth-child(7) .abub{animation-duration:7.9s;animation-delay:-2.2s}
+.anode:nth-child(8) .abub{animation-duration:9.1s;animation-delay:-7.8s}
+/* once the tools start spiralling in, the bubbles pop + fade away (absorbed into the timeline) */
+.orbit.converging .abub{animation:none;transition:opacity .45s var(--ease),transform .45s var(--ease);
+  opacity:0;transform:translateX(-50%) scale(1.18)}
+
+/* dotted/striped connectors → soft solid hairlines */
+.spine,.thread-body::before,.merge-body::before,.arrow-line .to{background:var(--line-2)}
+
+/* header strip: flat, just a hairline divider — no corner radius (parent .card clips) */
+.card-head{background:transparent;border-bottom:1px solid var(--line);border-radius:0}
+
+/* alert dots → warm red */
+.inbox-ico .ib-dot,.tg-dot{background:var(--over)}
+
+/* confessions band → deep vintage-teal panel with a soft gradient (distinct, warm) */
+.confess-section{background:linear-gradient(158deg,#2E3F3C,#21302D 70%)}
+.confess-section .h2,.confess-section .h2 em{color:#F1EAD8}
+.confess-section .h2 em{color:var(--c-mustard)}
+.confess-section .eyebrow{color:#9fb0aa}
+.confess-section .eyebrow .n{color:var(--c-mustard)}
+.confess-section .lead{color:#a7b6b0}
+.cc-count{color:#9fb0aa}.cc-count b{color:#fff}
+.confess-section .ca-go{border:1px solid rgba(241,234,216,.5);color:#F1EAD8;border-radius:10px;background:transparent}
+.confess-section .ca-go:hover{background:#F1EAD8;color:#21302D}
+
+/* ── editorial pass (inspo: cream paper, big tight grotesk, hairline rules, wide mono captions) ── */
+.hero-title{font-size:clamp(2.25rem,6.2vw,3.55rem);line-height:1.0;letter-spacing:-.045em}
+.h2{font-size:clamp(1.95rem,5.4vw,2.75rem);letter-spacing:-.04em}
+.fcta h2{letter-spacing:-.045em;font-size:clamp(2.1rem,6.2vw,3.1rem)}
+.lead{color:var(--ink-2);font-size:1.04rem}
+.section{border-top:1px solid var(--line-2)}
+.section.converge-section{border-top:none}
+/* wider letter-spacing on the mono micro-labels, like the references */
+.eyebrow{letter-spacing:.18em;gap:8px}
+.hero-meta,.due,.card-meta,.tg-bar .tg-l,.view-cap,.confess-meta,.coming .soon,.scrollcue{letter-spacing:.13em}
+
+/* ── primary-colour geometric brand shapes (inspo: Cafe Integral / gustav) ── */
+.glyphs{display:flex;align-items:center;justify-content:center;gap:15px;margin:0 auto 30px}
+.gly{width:16px;height:16px;flex:none;display:block}
+.gly.c{border-radius:50%}
+.gly.s{border-radius:2px}
+.gly.d{width:13px;height:13px;border-radius:2px;transform:rotate(45deg)}
+.gly.t{clip-path:polygon(50% 0,100% 100%,0 100%)}
+.gly.red{background:var(--c-red)}.gly.blue{background:var(--c-blue)}.gly.olive{background:var(--c-olive)}
+.gly.mustard{background:var(--c-mustard)}.gly.mauve{background:var(--c-mauve)}.gly.teal{background:var(--c-teal)}.gly.pink{background:var(--c-pink)}
+
+/* ── editorial list: colored numbering on the feed (inspo: 'open to work') ── */
+.feed .post .pk{display:inline-flex;align-items:center;gap:8px}
+.feed .post .pk::before{font-family:var(--mono);font-weight:700;font-size:.66rem;letter-spacing:.04em}
+.feed .post:nth-child(1) .pk::before{content:"(01)";color:var(--c-red)}
+.feed .post:nth-child(2) .pk::before{content:"(02)";color:var(--c-blue)}
+.feed .post:nth-child(3) .pk::before{content:"(03)";color:var(--c-olive)}
+
+/* ── square bullets on group headers (inspo: LimeIQ nav) ── */
+.vg-h::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent);flex:none}
+
+/* ══════════ DARK VINTAGE THEME — deep teal-black page, warm cream cards float on top ══════════ */
+:root{ --bg:#1F2A28; }
+body{
+  background:
+    radial-gradient(120% 78% at 50% -12%, rgba(60,122,114,.20), transparent 60%),
+    radial-gradient(95% 60% at 100% 112%, rgba(192,73,46,.13), transparent 62%),
+    linear-gradient(180deg,#26322F,#1A2321 72%);
+  background-attachment:fixed;
+}
+html:not(.light) .grain{display:block;opacity:.1;mix-blend-mode:screen;background-size:300px}
+/* loose typography on the dark page → warm cream */
+.logo .name,.logo .mark{color:#F1EAD8}
+.hero-title,.h2,.fcta h2{color:#F4EEDD}
+.hero-sub,.lead,.fcta p{color:#bcb3a1}
+.hero-meta,.stage-cap,.view-cap,footer{color:#8b877b}
+html:not(.light) .scrollcue{color:#c9c0ad;opacity:1}
+.h2 em,.fcta h2 em{color:var(--c-mustard)}
+.inbox-cap{color:#9a9388}.inbox-cap b{color:#dcd4c3}
+.cta-done,.cta-done .cd-h{color:#e7dfce}
+/* faint warm hairline dividers on the dark page */
+.section,footer{border-top-color:rgba(241,234,216,.12)}
+/* the hero card lifts off the dark page */
+.card{box-shadow:0 30px 64px -34px rgba(0,0,0,.55)}
+html:not(.light) .card-shell{background:#1c1b19;
+  box-shadow:0 22px 52px -18px rgba(0,0,0,.42)}
+/* soft dark halo fades the orbiting apps behind the centered scene text */
+.scene-center::before{background:radial-gradient(closest-side,#1F2A28 44%,rgba(31,42,40,.55) 68%,transparent 84%);filter:blur(2px)}
+.side-text::before{background:radial-gradient(closest-side,#1F2A28 48%,transparent 86%);filter:blur(3px)}
+/* confessions band → warm espresso so it stays a distinct "booth" against the teal page */
+.confess-section{background:linear-gradient(158deg,#2C2118,#1F1710 72%)}
+.confess-section .eyebrow{color:#a4906f}
+.confess-section .lead{color:#b6a88f}
+.confess-section .ca-go{border-color:rgba(241,234,216,.42)}
+.confess-section .ca-go:hover{background:#F1EAD8;color:#1F1710}
+
+/* ══════════════════════════════════════════════════════════
+   ZALI ✱ — ASTERISK / LICORICE / CANDY / GREEN  (brand v2)
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --bg:#0D0C0A;
+  --accent:#37B85A;          /* brand active = green */
+  --ok:#37B85A;              /* on-track / done = green */
+  --over:#E0492F;            /* overdue, brighter on black */
+  --round:'Quicksand','Space Grotesk',sans-serif;
+  --coral:#EC6A43; --peri:#C3BEF2; --pink:#F1C7D8; --yellow:#ECE158; --sky:#C2D6E2;
+}
+body{
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(55,184,90,.10), transparent 56%),
+    radial-gradient(90% 60% at 100% 112%, rgba(224,73,47,.07), transparent 60%),
+    linear-gradient(180deg,#141310,#0A0907 80%);
+  background-attachment:fixed;
+}
+/* no italics anywhere → roman */
+.t-done .td-h,.list-title em,.done-msg .dm-h,.h2 em,.fcta h2 em,.ft-c h3,
+.tg-empty .te-h,.cta-done,.cta-done .cd-h{font-style:normal}
+/* highlight words: same serif, no accent colour */
+.h2 em,.list-title em,.fcta h2 em{font-family:"Cardo",Georgia,serif;color:inherit;font-weight:400;font-style:normal}
+/* editorial serif moments */
+.t-done .td-h,.done-msg .dm-h,.ft-c h3,.tg-empty .te-h,.cta-done .cd-h{font-family:"Cardo",Georgia,serif;font-weight:400}
+
+/* wordmark — TenPoint */
+.logo .name{font-family:'TenPoint',var(--sans);font-weight:normal;letter-spacing:.01em}
+.logo .mark{color:var(--accent)}
+.logo .mark svg{width:30px;height:30px}
+
+/* old-Apple-ad roman serif display headings */
+.hero-title,.h2,.fcta h2,.list-title{font-family:"Cardo",Georgia,serif;font-weight:400;letter-spacing:-.035em}
+
+/* green = active / due / done */
+.due{color:var(--accent)} .due::before{background:var(--accent)}
+.task.done .box,.cf.done .cbox,.vrow.done .vchk,.cm-pill.done .cdot,.pcard .task.done .cb{background:var(--accent);border-color:var(--accent)}
+
+/* lift cards on the licorice page */
+.card,.triage,.view-body,.post,.merge-thread,.tl-card,.confess-aside{box-shadow:0 36px 84px -44px rgba(0,0,0,.72)}
+
+/* background-matched halo so tool icons fade out behind the scene text */
+.scene-center::before{display:block;background:radial-gradient(closest-side,#0E0D0B 46%,rgba(14,13,11,.62) 66%,transparent 84%);filter:blur(3px)}
+.side-text::before{display:block;background:radial-gradient(closest-side,#0E0D0B 50%,transparent 86%);filter:blur(4px)}
+
+/* theme toggle */
+#themeToggle{position:fixed;top:18px;right:18px;z-index:80;width:40px;height:40px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--cream);display:grid;place-items:center;cursor:pointer;
+  backdrop-filter:blur(6px);transition:transform .2s var(--ease),background .2s}
+#themeToggle:hover{transform:translateY(-1px)}
+#themeToggle svg{width:18px;height:18px}
+#themeToggle .moon{display:none}
+html.light #themeToggle{color:#211E18;border-color:rgba(33,30,24,.18);background:rgba(33,30,24,.04)}
+html.light #themeToggle .sun{display:none}
+html.light #themeToggle .moon{display:block}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT MODE — old-Apple-ad: cream paper, roman serif, minimal
+   ══════════════════════════════════════════════════════════ */
+html.light body{color:#211E18;
+  background:linear-gradient(180deg,#d8d7e3 0%,#f7f7f7 100%);
+  background-attachment:fixed}
+html.light .grain{display:block;mix-blend-mode:multiply;opacity:.22;background-size:185px;filter:contrast(1.1)}
+html.light .logo .name,html.light .logo .mark{color:#211E18}
+html.light .hero-title,html.light .h2,html.light .fcta h2,html.light .list-title,html.light .t-title,html.light .h2 em{color:#211E18}
+html.light .hero-sub,html.light .lead,html.light .fcta p,html.light .t-desc{color:#6f6757}
+html.light .hero-meta,html.light .stage-cap,html.light .view-cap,html.light footer,html.light .eyebrow,html.light .ey{color:#9a907c}
+html.light .scrollcue{color:#5e5544;opacity:1}
+html.light .section,html.light footer{border-top-color:rgba(33,30,24,.14)}
+html.light .card-shell{background:#cbc9c5;
+  box-shadow:0 12px 38px -16px rgba(33,30,24,.12)}
+html.light .card,html.light .triage,html.light .view-body,html.light .post,html.light .merge-thread,html.light .tl-card,html.light .fin-card,html.light .confess-aside,html.light .tg-stack,html.light .tg-card{background:#FBF9F2;border-color:rgba(33,30,24,.12)}
+html.light .hero .card-shell{background:transparent;box-shadow:none}
+html.light .hero .card-shell::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.82) 0%,rgba(255,255,255,.28) 42%,transparent 68%)}
+html.light .hero .card-shell .card{background:linear-gradient(180deg,#fff 0%,#fffef9 100%);border:none;
+  box-shadow:0 0 0 1px rgba(255,255,255,1),0 6px 30px -6px rgba(255,255,255,.85),0 26px 68px -22px rgba(33,30,24,.09),0 0 130px -14px rgba(255,255,255,.7),inset 0 1px 0 rgba(255,255,255,.95)}
+html:not(.light) .hero .card-shell{background:transparent;box-shadow:none}
+html:not(.light) .hero .card-shell::before{background:radial-gradient(ellipse at center,rgba(255,250,242,.28) 0%,rgba(255,255,255,.08) 40%,transparent 66%)}
+html:not(.light) .hero .card-shell .card{background:linear-gradient(180deg,#fff 0%,#faf8f3 100%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.2),0 10px 42px -10px rgba(255,255,255,.18),0 30px 76px -26px rgba(0,0,0,.48),0 0 100px -12px rgba(255,248,238,.24),inset 0 1px 0 rgba(255,255,255,.9)}
+html.light .card-head{background:rgba(33,30,24,.05);border-bottom-color:rgba(33,30,24,.1)}
+html.light .field{background:#fff;border-color:rgba(33,30,24,.18);color:#211E18}
+html.light .signup{background:#211E18;color:#FBF9F2}
+html.light .anode .ai{background:#fff;border-color:rgba(33,30,24,.1);
+  box-shadow:0 10px 28px -14px rgba(33,30,24,.14),0 2px 8px -4px rgba(33,30,24,.08)}
+html.light .anode .ai .ic{filter:saturate(1.14) contrast(1.05)}
+html.light .chip,html.light .who-chip,html.light .vt,html.light .tl-tab,html.light .cm-pill{background:#FBF9F2;border-color:rgba(33,30,24,.12);color:#211E18}
+html.light .box,html.light .cf .cbox,html.light .vrow .vchk{border-color:rgba(33,30,24,.26)}
+html.light .t-desc b{color:#3a3428}
+html.light .confess-section{background:linear-gradient(158deg,#EFE9DA,#E6DECC 78%)}
+html.light .confess-section .eyebrow,html.light .confess-section .lead{color:#8a7e66}
+/* depth halo: above orbiting icons, behind headline — only fades apps passing under the text */
+html.light .scene-center::before{display:block;left:50%;top:50%;transform:translate(-50%,-50%);width:min(58vw,540px);height:min(38vh,320px);z-index:-1;border-radius:0;pointer-events:none;
+  background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.82) 0%,rgba(216,215,227,.48) 36%,rgba(228,227,235,.18) 58%,transparent 72%);filter:blur(16px)}
+html.light .side-text::before{width:min(110vw,720px);height:min(90vh,520px);border-radius:0;
+  background:radial-gradient(ellipse 100% 90% at 50% 50%,rgba(216,215,227,.5) 0%,rgba(216,215,227,.22) 46%,transparent 72%);filter:blur(14px)}
+html.light .card,html.light .triage,html.light .view-body,html.light .post,html.light .merge-thread,html.light .tl-card,html.light .confess-aside{box-shadow:0 30px 64px -40px rgba(33,30,24,.32)}
+html.light ::selection{background:#211E18;color:#FBF9F2}
+html.light .spine,html.light .spine::after{filter:none}
+/* funnel finale — theme-aware caption + badge ring */
+.funnel-text b{color:#F4EEDD}.funnel-text span{color:#a39a88}
+html.light .funnel-text b{color:#211E18}html.light .funnel-text span{color:#8a7e66}
+html.light .fbox .fcount{border-color:#FBF9F2}
+
+/* ── in-scene triage: the cursor opens the inbox, then it gets triaged as you scroll ── */
+.triage{text-align:left}
+.ucursor{position:absolute;left:-7px;top:-5px;width:24px;height:24px;z-index:30;opacity:0;pointer-events:none;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
+.ucursor svg{display:block;width:100%;height:100%}
+@media(prefers-reduced-motion:reduce){.ucursor{display:none}}
+.ib-dot.ok{min-width:0;width:18px;height:18px;padding:0;border:none;border-radius:50%;background:#2f8a52;
+  font-size:0;animation:okpulse 2.6s var(--ease) infinite}
+.stage-cleared .inbox-ico .ib-dot.ok{top:-6px;right:-6px}
+@keyframes okpulse{0%{box-shadow:0 0 0 0 rgba(47,138,82,.5)}70%{box-shadow:0 0 0 9px rgba(47,138,82,0)}100%{box-shadow:0 0 0 0 rgba(47,138,82,0)}}
+
+/* ── in-scene triage: the inbox is clicked open right where the conversations landed (scroll-driven) ── */
+.stage-triage{position:absolute;left:50%;top:50%;width:min(430px,92vw);z-index:6;
+  transform:translate(-50%,-50%) scale(.92);opacity:0;will-change:transform,opacity}
+.stage-triage .triage{margin-top:0;width:100%;opacity:1;transform:none;transition:none}
+.stage-triage .tg-card{transition:none}
+.stage-sticky .ucursor{transition:opacity .2s var(--ease)}
+.stage-triage .tg-actions .tg-btn{user-select:none}
+.stage-triage .tg-actions .tg-btn.hot{transform:translateY(-1px)}
+.stage-triage .tg-actions .tg-btn.task.hot{box-shadow:0 0 0 3px rgba(50,79,134,.32)}
+.stage-triage .tg-actions .tg-btn.draft.hot{box-shadow:0 0 0 3px rgba(50,79,134,.18)}
+.stage-triage .tg-actions .tg-btn.skip.hot{box-shadow:0 0 0 3px rgba(124,118,52,.22)}
+.stage-cleared{position:absolute;left:50%;top:50%;z-index:6;display:flex;flex-direction:column;align-items:center;gap:13px;
+  transform:translate(-50%,-50%) scale(.9);opacity:0;will-change:transform,opacity;text-align:center}
+.stage-cleared .inbox-ico{width:84px;height:84px;border-radius:23px}
+.stage-cleared .inbox-ico svg{width:40px;height:40px}
+.stage-cleared .tgc-h{font-family:"Cardo",Georgia,serif;font-weight:400;font-size:1.3rem;color:var(--ink)}
+.stage-cleared .tgc-s{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.triage-cap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(700px,92vw);text-align:center;z-index:7;
+  opacity:0;pointer-events:none;will-change:opacity}
+
+/* ── full circle: the cleared inbox opens into a clean, guided task list (same pin) ── */
+.fin-wrap{position:absolute;left:50%;top:50%;z-index:6;opacity:0;transform:translate(-50%,-50%);width:min(462px,92vw);overflow:visible;will-change:transform,opacity}
+.fin-card{position:relative;z-index:2;width:100%;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 64px -34px rgba(0,0,0,.6);
+  will-change:transform,opacity}
+.fin-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(70,33,26,.06);border-bottom:1px solid var(--line)}
+.fin-h-l{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.fin-prog{font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.fin-list{padding:8px 8px}
+.fin-item{display:flex;align-items:flex-start;gap:11px;padding:12px 11px;border-radius:12px;position:relative;will-change:transform,opacity}
+.fin-item+.fin-item{margin-top:1px}
+.fin-item.focus{background:rgba(50,79,134,.10)}
+.fin-chk{flex:none;width:21px;height:21px;border-radius:50%;border:2px solid var(--faint);margin-top:1px;display:grid;place-items:center;transition:border-color .35s,background .35s}
+.fin-chk svg{width:11px;height:11px;color:var(--card);opacity:0;transform:scale(.4);transition:.3s var(--ease)}
+.fin-item.done .fin-chk{background:var(--ink);border-color:var(--ink)}
+.fin-item.done .fin-chk svg{opacity:1;transform:none}
+.fin-bd{flex:1;min-width:0}
+.fin-tx{font-size:.95rem;color:var(--ink);line-height:1.35;transition:color .3s var(--ease)}
+.fin-item.done .fin-tx{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint)}
+.fin-meta{display:flex;align-items:center;gap:9px;margin-top:6px;flex-wrap:wrap}
+.fin-src{flex:none;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.5rem;font-weight:700}
+.fin-from{font-family:var(--mono);font-size:.53rem;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+.fin-due{font-family:var(--mono);font-size:.53rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.fin-due.soon{color:#e0492f;border-color:rgba(224,73,47,.34)}
+.fin-bar{height:4px;background:rgba(70,33,26,.10)}
+.fin-bar-fill{display:block;height:100%;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left center;will-change:transform}
+/* thread pings — messages arrive, then the matching row checks off */
+.fin-threads{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible}
+.fin-msg{position:absolute;display:flex;align-items:center;opacity:0;will-change:opacity,transform}
+.fin-msg--0{left:-6px;top:58px;flex-direction:row-reverse;transform-origin:right center}
+.fin-msg--1{right:-6px;top:118px;transform-origin:left center}
+.fin-msg--2{left:-6px;top:178px;flex-direction:row-reverse;transform-origin:right center}
+.fin-msg-line{display:block;width:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent));opacity:.45;transition:width .35s var(--ease)}
+.fin-msg--1 .fin-msg-line{background:linear-gradient(270deg,transparent,var(--accent))}
+.fin-msg-bub{display:flex;align-items:center;gap:8px;max-width:min(200px,46vw);padding:8px 11px;border-radius:12px;
+  background:var(--card);border:1px solid var(--line);box-shadow:0 10px 28px -16px rgba(33,30,24,.28);
+  font-size:.78rem;line-height:1.35;color:var(--ink);position:relative}
+html.light .fin-msg-bub{background:#FBF9F2;box-shadow:0 8px 22px -14px rgba(33,30,24,.16)}
+.fin-msg-src{flex:none;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.52rem;font-weight:700}
+.fin-msg-tx{flex:1;min-width:0}
+.fin-spark{position:absolute;top:-4px;right:-4px;width:14px;height:14px;pointer-events:none;opacity:0}
+.fin-spark::before,.fin-spark::after{content:"";position:absolute;border-radius:50%;background:var(--accent)}
+.fin-spark::before{width:5px;height:5px;top:4px;left:4px;animation:finSparkA 1.1s var(--ease) infinite}
+.fin-spark::after{width:3px;height:3px;top:1px;left:9px;animation:finSparkB 1.4s var(--ease) .2s infinite}
+@keyframes finSparkA{0%,100%{opacity:0;transform:scale(.4)}35%,65%{opacity:.85;transform:scale(1)}}
+@keyframes finSparkB{0%,100%{opacity:0;transform:scale(.3) translateY(0)}40%,70%{opacity:.6;transform:scale(1) translateY(-3px)}}
+.fin-item.checking .fin-chk{box-shadow:0 0 0 3px rgba(50,79,134,.18)}
+@media(min-width:900px){
+  .fin-msg--0{left:-204px;top:58px;flex-direction:row}
+  .fin-msg--1{right:-204px;top:118px}
+  .fin-msg--2{left:-204px;top:178px;flex-direction:row}
+  .fin-msg-bub{max-width:196px}
+}
+.fin-cap{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);width:min(700px,92vw);text-align:center;z-index:5;opacity:0;pointer-events:none;will-change:opacity,transform}
+.fin-explore{margin:14px 0 0;font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);opacity:0;will-change:opacity}
+.fin-explore-arr{display:inline-block;margin-left:6px;animation:nudge 1.8s var(--ease) infinite}
+
+/* ── explore more: the loop, framed as your next task list ── */
+.explore-section{text-align:center}
+.ex-card{width:min(462px,92vw);margin:30px auto 0;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 14px 36px -20px rgba(33,30,24,.2)}
+.ex-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(70,33,26,.06);border-bottom:1px solid var(--line)}
+.ex-h-l{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.ex-h-r{font-family:var(--mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.ex-list{padding:8px}
+.ex-item{display:flex;align-items:flex-start;gap:11px;padding:13px 11px;border-radius:12px;text-decoration:none;transition:background .25s var(--ease)}
+.ex-item+.ex-item{margin-top:1px}
+.ex-item:hover{background:rgba(50,79,134,.10)}
+.ex-chk{flex:none;width:21px;height:21px;border-radius:50%;border:2px solid var(--faint);margin-top:3px;position:relative;transition:border-color .25s var(--ease),background .25s var(--ease)}
+.ex-item:hover .ex-chk{border-color:var(--ink)}
+.ex-bd{flex:1;min-width:0}
+.ex-tx{font-size:.95rem;color:var(--ink);line-height:1.35}
+.ex-meta{display:flex;align-items:center;gap:9px;margin-top:6px}
+.ex-src{flex:none;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:.5rem;font-weight:700}
+.ex-from{font-family:var(--mono);font-size:.53rem;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+.ex-go{flex:none;font-family:var(--mono);color:var(--muted);transition:transform .25s var(--ease),color .25s var(--ease)}
+.ex-item:hover .ex-go{transform:translateX(3px);color:var(--ink)}
+.ex-form{margin-top:10px}
+.ex-form .field{min-width:0;flex:1;font-size:.84rem;padding:10px 12px;border-radius:12px}
+.ex-form .signup{padding:10px 18px;border-radius:12px;font-size:.72rem}
+.ex-item.done .ex-chk{background:var(--accent);border-color:var(--accent)}
+.ex-chk svg{position:absolute;inset:0;margin:auto;width:11px;height:11px;color:#fff;opacity:0;transform:scale(.4);transition:.3s var(--ease)}
+.ex-item.done .ex-chk svg{opacity:1;transform:scale(1)}
+.ex-item.done .ex-tx{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.ex-item.done .ex-form,.ex-item.done .ex-act{display:none}
+#exConfess.done .ex-act,#outroShareBtn.done .ex-act{display:block}
+.ex-act{margin-top:10px}
+.ex-desc{margin-top:5px;font-size:.78rem;line-height:1.45;color:var(--muted)}
+.ex-act .signup{display:inline-flex;align-items:center;text-decoration:none;padding:9px 16px;font-size:.72rem}
+.ex-confess-panel{margin-top:2px;padding:12px 11px 10px;background:rgba(33,30,24,.06);border-top:1px solid var(--line)}
+.ex-confess-lbl{font-family:var(--mono);font-size:.52rem;text-transform:uppercase;letter-spacing:.11em;color:var(--faint);margin-bottom:8px}
+.ex-confess-preview{position:relative;height:84px;margin-top:2px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 72%,transparent);mask-image:linear-gradient(180deg,#000 72%,transparent)}
+.ex-confess-preview .mini-sticky{position:absolute;width:70px;min-height:50px;max-height:58px;padding:7px 6px;
+  font-family:var(--sans);font-size:.52rem;font-weight:500;line-height:1.22;color:#211e18;border-radius:2px;
+  box-shadow:0 3px 10px rgba(33,30,24,.14);transform:rotate(var(--rot,-2deg));overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word}
+.ex-confess-preview .mini-sticky.done{opacity:.58;text-decoration:line-through;text-decoration-color:rgba(33,30,24,.32)}
+.ex-confess-preview .mini-sticky.font-serif{font-family:var(--serif);font-size:.54rem;line-height:1.18}
+.ex-confess-preview .mini-sticky.font-script{font-family:'Caveat',cursive;font-size:.78rem;font-weight:700;line-height:1.1}
+html.light .ex-confess-panel{background:rgba(33,30,24,.04);border-top-color:rgba(33,30,24,.1)}
+html.light .ex-confess-lbl{color:#9a907c}
+html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shadow:0 12px 32px -18px rgba(33,30,24,.14)}
+/* steps (non-link rows) + list footer link */
+.ex-step{cursor:default}
+.ex-step:hover{background:none}
+.ex-num{flex:none;width:17px;height:17px;border-radius:5px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-size:.55rem;font-weight:700}
+.ex-foot{display:flex;align-items:center;gap:6px;padding:13px 16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);text-decoration:none;transition:color .25s var(--ease)}
+.ex-foot span{transition:transform .25s var(--ease)}
+.ex-foot:hover{color:var(--ink)}
+.ex-foot:hover span{transform:translateX(3px)}
+
+/* ── outro lists: appear in a row beneath the parked headline (in the same pin) ── */
+.fin-lists{position:absolute;left:50%;top:59%;transform:translate(-50%,-50%);z-index:6;
+  width:min(1000px,94vw);display:flex;align-items:flex-start;gap:18px;opacity:0;will-change:transform,opacity}
+.scene-footer{position:absolute;left:50%;bottom:max(16px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(1000px,92vw);z-index:6;
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px 18px;padding-top:16px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+  opacity:0;pointer-events:none;will-change:opacity}
+.scene-footer a{color:inherit;text-decoration:none;pointer-events:auto}
+.scene-footer a:hover{color:var(--ink)}
+.scene-footer nav{display:flex;flex-wrap:wrap;gap:10px 16px;pointer-events:auto}
+.fin-lists .ex-card{margin:0;flex:1;min-width:0;width:auto}
+@media(max-width:760px){
+  /* swipe through the lists instead of stacking */
+  .fin-lists{top:60%;width:100vw;gap:14px;align-items:stretch;
+    overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    padding:2px 9vw 14px;scrollbar-width:none}
+  .fin-lists::-webkit-scrollbar{display:none}
+  .fin-lists .ex-card{flex:0 0 82vw;width:82vw;scroll-snap-align:center;box-shadow:0 6px 18px -8px rgba(33,30,24,.1)}
+  html.light .fin-lists .ex-card{box-shadow:0 5px 16px -8px rgba(33,30,24,.08)}
+  .scene-footer{bottom:max(12px,env(safe-area-inset-bottom,0px));width:88vw;padding-top:12px}
+}
+
+</style>
+<link rel="stylesheet" href="/zali-loader.css">
+<script>(function(){try{var p=new URLSearchParams(location.search);var s=false;try{s=sessionStorage.getItem('zali_nav')==='1';}catch(_){}if(p.get('zali_nav')==='1'||s){document.documentElement.classList.add('zali-reveal');}}catch(_){}})();</script>
+<link id="gfont-Playfair-Display" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&amp;display=swap">
+<link id="gfont-Righteous" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous:wght@300;400;500;600;700&amp;display=swap">
+<link id="gfont-Raleway" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&amp;display=swap">
+<link id="gfont-Libre-Baskerville" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@300;400;500;600;700&amp;display=swap">
+</head>
+<body>
+<!-- GRID LOADER -->
+<div id="loader" class="zali-loader-shell" role="presentation" aria-hidden="true">
+  <div class="lg-grid" id="lgGrid"></div>
+  <div class="lg-logo" id="lgLogo">
+    <span class="lg-name">Zali</span>
+  </div>
+</div>
+<div class="grain"></div>
+<button id="themeToggle" type="button" aria-label="Toggle light / dark">
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4 7.5 7.5 0 1 0 20 14.5Z"/></svg>
+</button>
+
+<!-- LOGO -->
+<div class="logo">
+  <span class="name">Zali</span>
+</div>
+
+<!-- HERO -->
+<header class="hero" id="waitlist" style="font-family: Helvetica">
+  <h1 class="hero-title" style="font-family: &quot;Cardo&quot;; font-weight: 400">Catch it or lose it.</h1>
+  <p class="hero-sub" style="width: 577px">Zali is a task manager that builds your list from your messages using AI.</p>
+  <div class="card-shell">
+  <div class="card">
+    <div class="card-head">
+      <div class="due" id="dueHead" style="font-family: &quot;Space Mono&quot;">Due today</div>
+      <div class="card-meta">
+        <span id="clock" style="font-family: &quot;Space Mono&quot;">9:41:07 AM</span>
+        <span class="meta-sep" aria-hidden="true">·</span>
+        <span id="dateLabel" style="font-family: &quot;Space Mono&quot;">Thursday, 4 June</span>
+      </div>
+    </div>
+
+    <div class="tasks" id="tasks">
+
+      <!-- TASK 1 · waitlist -->
+      <div class="task" id="task" data-key="join">
+        <button class="box" id="boxJoin" type="button" aria-label="Join the waitlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button>
+        <div class="t-main">
+          <div class="t-title" id="taskTitle"></div>
+          <p class="t-desc">Drop your email and <b>get notified the moment it launches.</b></p>
+          <form id="form-hero" class="t-action collapsible" novalidate>
+            <div class="cardform">
+              <input class="field" type="email" placeholder="you@studio.com" aria-label="Email" required>
+              <button class="signup" type="submit">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TASK 2 · share -->
+      <div class="task" data-key="share">
+        <button class="box" id="boxShare" type="button" aria-label="Share zali"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button>
+        <div class="t-main">
+          <div class="t-title">Share Zali</div>
+          <p class="t-desc">Know someone who needs this? Pass the waitlist on.</p>
+          <div class="t-action">
+            <button class="share-btn" id="shareBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+              Share zali
+            </button>
+            <span class="share-note" id="shareNote"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TASK 3 · task board -->
+      <div class="task" data-key="confess">
+        <button class="box" id="boxConfess" type="button" aria-label="Add a task to the Zali Task Board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button>
+        <div class="t-main">
+          <div class="t-title">Add a task to the Zali Task Board</div>
+          <p class="t-desc">Pin it to the public board so it stops haunting you.</p>
+          <div class="t-action">
+            <a class="share-btn" id="confessLink" href="https://board.zali.so">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add a Task
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="done-msg" id="doneMsg">
+      <div class="dm-h" id="dmH">One down. See how easy that was?</div>
+      <div class="dm-s" id="doneSub">You're on the list</div>
+    </div>
+  </div>
+  </div>
+
+  <button class="scrollcue" id="scrollcue">how zali works <span class="arr">↓</span></button>
+</header>
+
+<div class="wrap">
+  <!-- CONVERGE: a pinned scene — centered → timeline → push aside → by conversation -->
+  <section class="section converge-section">
+    <div class="stage" id="stage">
+      <div class="stage-sticky">
+        <div class="scene" id="scene">
+
+          <!-- beat 1: centered headline, apps around it -->
+          <div class="scene-center" id="sceneCenter">
+            <h2 class="h2">Zali pulls every interaction from your tools into one space.</h2>
+          </div>
+
+          <!-- beat 1 → 2: orbiting apps -->
+          <div class="orbit" id="orbit">
+            <span class="anode" style="--ang:0deg;--sx:-128px;--sy:-192px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/gmail" alt="Gmail" loading="lazy"><span class="abub">“Can we push the launch to Friday?”</span></span></span>
+            <span class="anode" style="--ang:51deg;--sx:118px;--sy:-162px"><span class="ai"><svg class="ic" viewBox="0 0 122.8 122.8" xmlns="http://www.w3.org/2000/svg" aria-label="Slack"><path d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9z" fill="#E01E5A"/><path d="M32.3 77.6c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z" fill="#E01E5A"/><path d="M45.2 25.8c-7.1 0-12.9-5.8-12.9-12.9S38.1 0 45.2 0s12.9 5.8 12.9 12.9v12.9H45.2z" fill="#36C5F0"/><path d="M45.2 32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H12.9C5.8 58.1 0 52.3 0 45.2s5.8-12.9 12.9-12.9h32.3z" fill="#36C5F0"/><path d="M97 45.2c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9-5.8 12.9-12.9 12.9H97V45.2z" fill="#2EB67D"/><path d="M90.5 45.2c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V12.9C64.7 5.8 70.5 0 77.6 0s12.9 5.8 12.9 12.9v32.3z" fill="#2EB67D"/><path d="M77.6 97c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9V97h12.9z" fill="#ECB22E"/><path d="M77.6 90.5c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H77.6z" fill="#ECB22E"/></svg><span class="abub">“Acme wants the new logo in.”</span></span></span>
+            <span class="anode" style="--ang:103deg;--sx:-138px;--sy:-48px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/notion" alt="Notion" loading="lazy"><span class="abub">Brief updated</span></span></span>
+            <span class="anode" style="--ang:154deg;--sx:138px;--sy:-78px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/figma" alt="Figma" loading="lazy"><span class="abub">3 new comments</span></span></span>
+            <span class="anode" style="--ang:206deg;--sx:-128px;--sy:72px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/googlecalendar" alt="Google Calendar" loading="lazy"><span class="abub">Kickoff at 2:00</span></span></span>
+            <span class="anode" style="--ang:257deg;--sx:132px;--sy:58px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/linear" alt="Linear" loading="lazy"><span class="abub">ACME-214 assigned</span></span></span>
+            <span class="anode" style="--ang:309deg;--sx:-88px;--sy:172px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/vercel" alt="Vercel" loading="lazy"><span class="abub">acme-site deployed · v2.4</span></span></span>
+            <span class="anode" style="--ang:26deg;--sx:76px;--sy:188px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/github" alt="GitHub" loading="lazy"><span class="abub">PR #214 merged</span></span></span>
+            <span class="anode aextra" style="--ang:77deg;--sx:52px;--sy:-138px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/googlemeet" alt="Google Meet" loading="lazy"></span></span>
+            <span class="anode aextra" style="--ang:129deg;--sx:-76px;--sy:-96px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/googledrive" alt="Google Drive" loading="lazy"></span></span>
+            <span class="anode aextra" style="--ang:180deg;--sx:112px;--sy:124px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/dropbox" alt="Dropbox" loading="lazy"></span></span>
+            <span class="anode aextra" style="--ang:231deg;--sx:-118px;--sy:162px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/asana" alt="Asana" loading="lazy"></span></span>
+            <span class="anode aextra" style="--ang:283deg;--sx:32px;--sy:112px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/discord" alt="Discord" loading="lazy"></span></span>
+            <span class="anode aextra" style="--ang:334deg;--sx:102px;--sy:-58px"><span class="ai"><img class="ic" src="https://cdn.simpleicons.org/trello" alt="Trello" loading="lazy"></span></span>
+          </div>
+
+          <!-- explanatory text appears centered at the top, above the timeline -->
+          <div class="side-text" id="sideText">
+            <div class="st-msg" id="stMsg1">
+              <h2 class="h2">A chronological timeline.</h2>
+              <p class="lead">Every conversation, update, and notification — in one clear order.</p>
+            </div>
+          </div>
+
+          <!-- beat 2 onward: the unified timeline card -->
+          <div class="merge-thread tl-card" id="tlCard">
+            <div class="tl-stack">
+              <div class="tl-body" id="tlUnified">
+                <div class="mh">
+                  <span class="ava" aria-hidden="true">A</span>
+                  <div><div class="nm">Acme Studio</div><div class="mt">one thread · every channel</div></div>
+                  <span class="mpill">this week</span>
+                </div>
+                <div class="merge-body">
+                  <div class="mr"><span class="src" style="background:linear-gradient(120deg,#f2994a,#eb5757)">M</span><div class="mw-wrap"><div class="mtop"><span class="mw">Maya · Acme</span><span class="mchan">Gmail</span><span class="mwhen">Mon 9:02</span></div><div class="mx">"Can we push the launch to Friday?"</div></div></div>
+                  <div class="mr"><span class="src" style="background:linear-gradient(120deg,#7b5cff,#9d7bff)">#</span><div class="mw-wrap"><div class="mtop"><span class="mw">Dani</span><span class="mchan">Slack</span><span class="mwhen">Mon 10:14</span></div><div class="mx">"Acme also wants the new logo in the launch."</div></div></div>
+                  <div class="mr"><span class="src" style="background:#111">▲</span><div class="mw-wrap"><div class="mtop"><span class="mw">Automation</span><span class="mchan">Vercel</span><span class="mwhen">Mon 11:30</span></div><div class="mx">acme-site deployed to production · v2.4</div></div></div>
+                  <div class="mr"><span class="src" style="background:linear-gradient(120deg,#34d399,#10b981)">✦</span><div class="mw-wrap"><div class="mtop"><span class="mw">Kickoff note</span><span class="mchan">Granola</span><span class="mwhen">Mon 14:00</span></div><div class="mx">Friday launch · logo by Wed. → 2 tasks created</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- finale: conversations gather into one inbox -->
+          <div class="funnel" id="funnel" aria-hidden="true">
+            <div class="funnel-inbox" id="funnelInbox">
+              <span class="inbox-ico f-ico" id="fIco">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2.5-7.5A2 2 0 0 1 7.4 4h9.2a2 2 0 0 1 1.9 1.5L21 13M3 13v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5M3 13h5l1.5 2.5h5L16 13h5"/></svg>
+                <span class="ib-dot" id="fCount" style="opacity:0">0</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- inbox caption (same bottom spot as the others) -->
+          <div class="side-text" id="inboxCap">
+            <div class="st-msg">
+              <h2 class="h2">Zali pulls out tasks and drops them in to be triaged.</h2>
+            </div>
+          </div>
+
+          <!-- click the inbox → the triage opens in place (same scene, scroll-driven) -->
+          <div class="stage-triage" id="stageTriage" aria-hidden="true">
+            <div class="triage" id="triage">
+              <div class="tg-bar">
+                <span class="tg-l">Incoming <span class="tg-dot" aria-hidden="true"></span></span>
+                <span class="tg-count" id="tgCount">4 to triage</span>
+              </div>
+              <div class="tg-stack" id="tgStack"></div>
+              <div class="tg-actions">
+                <span class="tg-btn task" id="tgBtnTask"><span class="tg-btn-in"><span class="tg-arr" aria-hidden="true">→</span> Task</span></span>
+                <span class="tg-btn draft" id="tgBtnDraft"><span class="tg-btn-in">Draft reply</span></span>
+                <span class="tg-btn skip" id="tgBtnSkip"><span class="tg-btn-in">Skip</span></span>
+              </div>
+              <div class="tg-tally">
+                <span><b id="tlTask">0</b> tasks</span>
+                <span><b id="tlDraft">0</b> drafts</span>
+                <span><b id="tlSkip">0</b> skipped</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- cleared: the same inbox returns, now green (reverse the scroll and it loops back) -->
+          <div class="stage-cleared" id="stageCleared" aria-hidden="true">
+            <span class="inbox-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2.5-7.5A2 2 0 0 1 7.4 4h9.2a2 2 0 0 1 1.9 1.5L21 13M3 13v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5M3 13h5l1.5 2.5h5L16 13h5"/></svg>
+              <span class="ib-dot ok"></span>
+            </span>
+            <div class="tgc-h">All cleared.</div>
+            <div class="tgc-s">inbox zero · here's what's next</div>
+          </div>
+
+          <!-- the cleared inbox opens into a clean, guided task list (same pin) -->
+          <div class="fin-wrap" id="finWrap">
+            <div class="fin-threads" id="finThreads" aria-hidden="true">
+              <div class="fin-msg fin-msg--0" data-n="0">
+                <span class="fin-msg-line" aria-hidden="true"></span>
+                <span class="fin-msg-bub">
+                  <span class="fin-msg-src" style="background:linear-gradient(120deg,#f2994a,#eb5757)">M</span>
+                  <span class="fin-msg-tx">Maya replied — Friday launch confirmed</span>
+                  <span class="fin-spark" aria-hidden="true"></span>
+                </span>
+              </div>
+              <div class="fin-msg fin-msg--1" data-n="1">
+                <span class="fin-msg-line" aria-hidden="true"></span>
+                <span class="fin-msg-bub">
+                  <span class="fin-msg-src" style="background:linear-gradient(120deg,#7b5cff,#9d7bff)">#</span>
+                  <span class="fin-msg-tx">Dani — logo added to launch brief</span>
+                  <span class="fin-spark" aria-hidden="true"></span>
+                </span>
+              </div>
+              <div class="fin-msg fin-msg--2" data-n="2">
+                <span class="fin-msg-line" aria-hidden="true"></span>
+                <span class="fin-msg-bub">
+                  <span class="fin-msg-src" style="background:linear-gradient(120deg,#34d399,#10b981)">✦</span>
+                  <span class="fin-msg-tx">Kickoff recap sent to Acme</span>
+                  <span class="fin-spark" aria-hidden="true"></span>
+                </span>
+              </div>
+            </div>
+            <div class="fin-card" id="finCard">
+              <div class="fin-head">
+                <span class="fin-h-l">Today</span>
+                <span class="fin-prog" id="finProg">0 of 3 done</span>
+              </div>
+              <div class="fin-list" id="finList"></div>
+              <div class="fin-bar"><span class="fin-bar-fill" id="finFill"></span></div>
+            </div>
+          </div>
+
+          <div class="fin-cap" id="finCap1">
+            <h2 class="h2">Your tasks in a clean, focused view.</h2>
+            <p class="lead">Zali loops through threads and helps you get more done.</p>
+          </div>
+          <div class="fin-cap" id="finCap3">
+            <h2 class="h2">Capture. Triage. <em>Task.</em></h2>
+            <p class="fin-explore" id="finExplore">Explore more of Zali <span class="fin-explore-arr" aria-hidden="true">↓</span></p>
+          </div>
+
+          <!-- the line parks at the top and three task lists open beneath it -->
+          <div class="fin-lists" id="finLists" aria-hidden="true">
+
+            <!-- 1 · get started -->
+            <div class="ex-card">
+              <div class="ex-head"><span class="ex-h-l">Get started</span><span class="ex-h-r" id="exStartedCount">2 to do</span></div>
+              <div class="ex-list">
+                <div class="ex-item" id="exJoin" data-ex="join">
+                  <span class="ex-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">Join the Zali waitlist</div>
+                    <form id="form-fin" class="ex-form cardform" novalidate>
+                      <input class="field" type="email" placeholder="you@studio.com" aria-label="Email" required>
+                      <button class="signup" type="submit">Join</button>
+                    </form>
+                  </div>
+                </div>
+                <div class="ex-item" id="outroShareBtn" data-ex="share">
+                  <span class="ex-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">Share Zali</div>
+                    <p class="ex-desc">Know someone who needs this? Pass the waitlist on.</p>
+                    <div class="ex-act">
+                      <button class="share-btn" id="finShareBtn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                        Share zali
+                      </button>
+                      <span class="share-note" id="finShareNote"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2 · task board -->
+            <div class="ex-card">
+              <div class="ex-head"><span class="ex-h-l">Task board</span><span class="ex-h-r" id="exConfessCount">1 to do</span></div>
+              <div class="ex-list">
+                <div class="ex-item ex-step" id="exConfess" data-ex="confess">
+                  <span class="ex-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">Add a task to the Zali Task Board</div>
+                    <p class="ex-desc">Drop it on the public board, then come back and check it off.</p>
+                    <div class="ex-act">
+                      <a class="signup" id="finConfessBtn" href="https://board.zali.so">Add a Task</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ex-confess-panel">
+                <div class="ex-confess-lbl">Zali Task Board · open tasks in public</div>
+                <div class="ex-confess-preview" id="finConfessPreview" aria-hidden="true"></div>
+              </div>
+              <a class="ex-foot" href="https://board.zali.so" id="finConfessFoot">Add a Task <span>→</span></a>
+            </div>
+
+            <!-- 3 · posts -->
+            <div class="ex-card">
+              <div class="ex-head"><span class="ex-h-l">Posts</span><span class="ex-h-r">latest</span></div>
+              <div class="ex-list" id="cmsUpdatesList">
+                <a class="ex-item" href="#">
+                  <span class="ex-chk"></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">The triage inbox is live</div>
+                    <div class="ex-meta"><span class="ex-src" style="background:linear-gradient(120deg,#f2994a,#eb5757)">✦</span><span class="ex-from">changelog</span></div>
+                  </div>
+                  <span class="ex-go">→</span>
+                </a>
+                <a class="ex-item" href="#">
+                  <span class="ex-chk"></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">Context-switching brains</div>
+                    <div class="ex-meta"><span class="ex-src" style="background:linear-gradient(120deg,#7b5cff,#9d7bff)">✎</span><span class="ex-from">essay</span></div>
+                  </div>
+                  <span class="ex-go">→</span>
+                </a>
+                <a class="ex-item" href="#">
+                  <span class="ex-chk"></span>
+                  <div class="ex-bd">
+                    <div class="ex-tx">Watch: Slack, unified</div>
+                    <div class="ex-meta"><span class="ex-src" style="background:#111">▶</span><span class="ex-from">demo · 0:48</span></div>
+                  </div>
+                  <span class="ex-go">→</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- the cursor that taps the inbox -->
+          <div class="ucursor" id="tgCursor" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="#fff" stroke="#1c2330" stroke-width="1.3" stroke-linejoin="round"><path d="M5 2.5v16.5l4.2-4.1 2.5 5.4 2.8-1.3-2.4-5.2H19z"/></svg>
+          </div>
+
+          <!-- triage caption, bottom-centred -->
+          <div class="triage-cap" id="triageCap">
+            <h2 class="h2">Stay on top of things.</h2>
+            <p class="lead">Make it a task, add it to a project, draft a reply, or set it aside for later.</p>
+          </div>
+
+        </div>
+
+        <!-- footer rides in with the final boards, pinned to the bottom of the viewport -->
+        <footer class="scene-footer" id="finFooter">
+          <span id="finFooterCopy">zali © 2026</span>
+          <nav id="finFooterLinks" aria-label="Footer"></nav>
+        </footer>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/cms-bridge.js" defer></script>
+<script src="https://unpkg.com/lenis@1.3.23/dist/lenis.min.js"></script>
+<script>
+/* Lenis smooth scroll — wired into scrollytelling sync via scroll events */
+(function(){
+  if(!window.Lenis) return;
+  var lenis=new Lenis({
+    autoRaf:true,
+    autoToggle:true,
+    allowNestedScroll:true,
+    anchors:{offset:20},
+    lerp:0.09,
+    wheelMultiplier:1.12,
+    touchMultiplier:1.6
+  });
+  window.ZaliLenis=lenis;
+  window.ZaliScrollTo=function(y,immediate){
+    lenis.scrollTo(y,{immediate:!!immediate});
+  };
+  lenis.on('scroll',function(){ window.dispatchEvent(new Event('scroll')); });
+})();
+</script>
+<script>
+(function(){
+  var TITLE="Join the Zali waitlist.";
+  var KEY="zali_first_visit_v1";
+
+  // ── url demo overrides ──
+  var qs=new URLSearchParams(location.search);
+  if(qs.get('reset')!==null){ try{localStorage.removeItem(KEY);}catch(_){} }
+  var force=qs.get('demo'); // 'today' | 'overdue'
+
+  function fmt(d){return d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});}
+  function fmtShort(d){return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+
+  // ── visit + due state ──
+  var DAY=864e5;
+  var now=new Date(), firstVisit=null, visits=1;
+  try{
+    var stored=localStorage.getItem(KEY);
+    if(stored){ firstVisit=new Date(+stored); }
+    else{ localStorage.setItem(KEY, String(now.getTime())); firstVisit=now; }
+    visits=(parseInt(localStorage.getItem(KEY+'_visits')||'0',10)||0)+1;
+    localStorage.setItem(KEY+'_visits', String(visits));
+  }catch(_){ firstVisit=now; }
+  if(force==='overdue'){ if(!firstVisit||now-firstVisit<DAY){ firstVisit=new Date(now.getTime()-3*DAY);} }
+  if(force==='today'){ firstVisit=now; }
+
+  var head=document.getElementById('dueHead');
+  document.getElementById('dateLabel').textContent=fmt(now);
+
+  function applyDue(){
+    var diff=now-firstVisit, overdue=false;
+    if(force==='today'){ overdue=false; }
+    else if(force==='overdue'){ overdue=true; }
+    else if(diff>=DAY){ overdue=true; }
+    if(overdue){
+      head.textContent="Past due";
+      head.classList.add('over');
+    }else{
+      head.textContent="Due today";
+      head.classList.remove('over');
+    }
+  }
+  applyDue();
+
+  // ── live clock ──
+  var clockEl=document.getElementById('clock');
+  function tick(){
+    var d=new Date();
+    var h=d.getHours(), m=d.getMinutes(), s=d.getSeconds(), ap=h>=12?'PM':'AM';
+    h=h%12||12;
+    clockEl.textContent=h+':'+(m<10?'0'+m:m)+':'+(s<10?'0'+s:s)+' '+ap;
+  }
+  tick(); setInterval(tick,1000);
+
+  // ── typewriter task title ──
+  var tt=document.getElementById('taskTitle'), i=0;
+  tt.innerHTML='<span class="caret"></span>';
+  function type(){
+    if(i<=TITLE.length){
+      tt.innerHTML=TITLE.slice(0,i)+'<span class="caret"></span>';
+      i++; setTimeout(type, 55+Math.random()*45);
+    } else { tt.textContent=TITLE; }
+  }
+  setTimeout(type, 900);
+
+  // ── reveal ──
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.18});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+  // ── scroll cue ──
+  document.getElementById('scrollcue').addEventListener('click',function(){
+    var sec=document.querySelector('.section');
+    if(sec){
+      var y=sec.getBoundingClientRect().top+window.scrollY-20;
+      if(window.ZaliScrollTo) window.ZaliScrollTo(y);
+      else window.scrollTo({top:y,behavior:'smooth'});
+    }
+  });
+
+  // ── converge: pinned scene — centered → timeline → push aside → by conversation ──
+  var stage=document.getElementById('stage');
+  var scene=document.getElementById('scene');
+  var card=document.getElementById('tlCard');
+  if(stage&&scene&&card){
+    var clamp=function(v){return v<0?0:v>1?1:v;};
+    var orbit=document.getElementById('orbit');
+    var sceneCenter=document.getElementById('sceneCenter');
+    var sideText=document.getElementById('sideText');
+    var tlUnified=document.getElementById('tlUnified');
+    var stageCap=document.getElementById('stageCap');
+    var rows=[].slice.call(tlUnified.querySelectorAll('.mr'));
+
+    // ── funnel finale: conversations gather, then drop toward the inbox below ──
+    var funnelEl=document.getElementById('funnel');
+    var funnelInbox=document.getElementById('funnelInbox');
+    var inboxCap=document.getElementById('inboxCap');
+    var fCount=document.getElementById('fCount');
+    var lastLanded=-1;
+    var easeOut=function(t){return 1-Math.pow(1-t,3);};
+    var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};
+    var FDATA=[
+      {ic:'M',bg:'linear-gradient(120deg,#f2994a,#eb5757)',label:'Push launch to Friday'},
+      {ic:'#',bg:'linear-gradient(120deg,#7b5cff,#9d7bff)',label:'Add the new logo'},
+      {ic:'▲',bg:'#111',label:'Deploy v2.4'},
+      {ic:'✦',bg:'linear-gradient(120deg,#34d399,#10b981)',label:'Logo by Wednesday'}
+    ];
+    var SCATTER=[[-176,-58],[150,-104],[-128,92],[176,52]];
+    var fchips=[];
+    if(funnelEl){
+      FDATA.forEach(function(d){
+        var c=document.createElement('div'); c.className='fchip';
+        c.innerHTML='<span class="fci" style="background:'+d.bg+'">'+d.ic+'</span>'+d.label;
+        funnelEl.appendChild(c); fchips.push(c);
+      });
+    }
+
+    // ── in-scene triage: the inbox is clicked open right where conversations landed ──
+    var fIco=document.getElementById('fIco');
+    var stageTriage=document.getElementById('stageTriage');
+    var stageCleared=document.getElementById('stageCleared');
+    var triageCap=document.getElementById('triageCap');
+    var cursor=document.getElementById('tgCursor');
+    var tgCount=document.getElementById('tgCount');
+    var tgStack=document.getElementById('tgStack');
+    var btns={task:document.getElementById('tgBtnTask'),draft:document.getElementById('tgBtnDraft'),skip:document.getElementById('tgBtnSkip')};
+    var tEl={task:document.getElementById('tlTask'),draft:document.getElementById('tlDraft'),skip:document.getElementById('tlSkip')};
+    var TG=[
+      {who:'Maya',chan:'Gmail',msg:'"Can we push the launch to Friday?"',bg:'linear-gradient(120deg,#f2994a,#eb5757)',ic:'M',act:'task'},
+      {who:'Dani',chan:'Slack',msg:'"Acme also wants the new logo in."',bg:'linear-gradient(120deg,#7b5cff,#9d7bff)',ic:'#',act:'task'},
+      {who:'Vercel',chan:'Deploy',msg:'acme-site deployed · v2.4',bg:'#111',ic:'▲',act:'skip'},
+      {who:'Kickoff',chan:'Granola',msg:'Agreed: Friday launch, logo by Wed.',bg:'linear-gradient(120deg,#34d399,#10b981)',ic:'✦',act:'draft'}
+    ];
+    var tgCards=[];
+    if(tgStack){
+      TG.forEach(function(it){
+        var c=document.createElement('div'); c.className='tg-card';
+        c.innerHTML='<span class="src" style="background:'+it.bg+'">'+it.ic+'</span>'+
+          '<div><span class="tc-who">'+it.who+'</span><span class="tc-chan">'+it.chan+'</span>'+
+          '<div class="tc-msg">'+it.msg+'</div></div>';
+        tgStack.appendChild(c); tgCards.push(c);
+      });
+    }
+    var lastTally={task:-1,draft:-1,skip:-1};
+
+    // ── full circle: the cleared inbox opens into a clean, guided task list (same pin) ──
+    var finWrap=document.getElementById('finWrap');
+    var finMsgs=document.querySelectorAll('.fin-msg');
+    var finList=document.getElementById('finList');
+    var finListsEl=document.getElementById('finLists');
+    var finFooter=document.getElementById('finFooter');
+    var finCap1=document.getElementById('finCap1'),finCap3=document.getElementById('finCap3'),finExplore=document.getElementById('finExplore');
+    var finProg=document.getElementById('finProg'),finFill=document.getElementById('finFill');
+    // the skipped conversation (Vercel deploy) is intentionally absent — only triaged tasks/drafts land here
+    var FIN=[
+      {tx:'Reply to Maya — confirm Friday launch',from:'Gmail · Maya',bg:'linear-gradient(120deg,#f2994a,#eb5757)',ic:'M',due:'due today',dueCls:'soon'},
+      {tx:'Add the new logo to launch scope',from:'Slack · Dani',bg:'linear-gradient(120deg,#7b5cff,#9d7bff)',ic:'#',due:'due Wed'},
+      {tx:'Send the kickoff recap to Acme',from:'Granola',bg:'linear-gradient(120deg,#34d399,#10b981)',ic:'✦',due:'due Fri'}
+    ];
+    var FINCHK='<span class="fin-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
+    var finItems=[];
+    if(finList){
+      FIN.forEach(function(d){
+        var el=document.createElement('div'); el.className='fin-item';
+        el.innerHTML=FINCHK+'<div class="fin-bd"><div class="fin-tx">'+d.tx+'</div>'+
+          '<div class="fin-meta"><span class="fin-src" style="background:'+d.bg+'">'+d.ic+'</span>'+
+          '<span class="fin-from">'+d.from+'</span>'+
+          '<span class="fin-due'+(d.dueCls?' '+d.dueCls:'')+'">'+d.due+'</span></div></div>';
+        finList.appendChild(el); finItems.push(el);
+      });
+    }
+    var finN=finItems.length, finLastDone=-1;
+
+    var raf=null;
+    function sync(){
+      raf=null;
+      var r=stage.getBoundingClientRect();
+      var travel=r.height-window.innerHeight;
+      var raw=clamp((0-r.top)/(travel||1));
+      // first part of the pin is the tools→triage story; the rest is the cleared inbox → task list → outro lists
+      var SPLIT=0.72;
+      var p=clamp(raw/SPLIT);
+      // compress the finale tail so boards + footer finish before the pin runs out of runway
+      var pfRaw=clamp((raw-SPLIT)/(1-SPLIT));
+      var pf=clamp(pfRaw/0.74);   // more runway for the clean-view / task-list finale
+      stage.style.setProperty('--p',p.toFixed(3));
+
+      // beat segments
+      var conv   = clamp((p-0.08)/0.14);   // apps spiral inward + fade
+      var cardIn = clamp((p-0.13)/0.12);   // timeline card materialises (centered)
+      var topT   = clamp((p-0.29)/0.13);   // explanatory text fades in at the bottom
+      var fun    = clamp((p-0.45)/0.15);   // conversations scatter + funnel into the inbox
+      var open   = clamp((p-0.62)/0.06);   // inbox is clicked → triage opens in place
+      var triA   = clamp((p-0.70)/0.22);   // the cards get triaged one by one
+      var clr    = clamp((p-0.88)/0.05);   // as the last card slides out: fade the box + show the cleared "done"
+
+      // ── text beats: each line appears the instant the previous one clears ──
+      var toolsTxt = 1 - clamp((p-0.10)/0.05);                                   // tools  → out by .15
+      var tlTxt    = clamp((p-0.16)/0.04) * (1 - clamp((p-0.42)/0.04));          // timeline .16–.46
+      var inTxt    = clamp((p-0.46)/0.04) * (1 - clamp((p-0.62)/0.04));          // inbox   .46–.66
+      var trTxt    = clamp((p-0.66)/0.04) * (1 - clamp((p-0.92)/0.04));          // triage  .66–.96
+
+      // apps converge into the centre
+      orbit.style.setProperty('--conv', conv.toFixed(3));
+      // mobile: gentle scroll parallax — icons drift up as you scroll into the tools beat
+      if(innerWidth<=640){
+        var drift=-clamp((p-0.02)/0.18)*10*(1-conv*0.85);
+        orbit.style.setProperty('--drift',drift.toFixed(1)+'px');
+      }else{ orbit.style.removeProperty('--drift'); }
+      // as soon as they start spiralling in, pop + fade the message bubbles (absorbed into the timeline)
+      orbit.classList.toggle('converging', conv>0.04);
+
+      // centred headline holds, then clears the instant the timeline line arrives
+      if(sceneCenter){
+        sceneCenter.style.opacity=clamp(toolsTxt).toFixed(3);
+        sceneCenter.style.transform='translate(-50%,-50%) translateY('+(-conv*20).toFixed(1)+'px) scale('+(1-conv*0.06).toFixed(3)+')';
+      }
+
+      // card sits at the same fixed spot as triage / cleared / finale (no upward drift), then recedes into the funnel
+      card.style.setProperty('--cardX','0px');
+      card.style.setProperty('--cardY','-82px');
+      card.style.setProperty('--cardScale',(0.97+cardIn*0.03-fun*0.12).toFixed(3));
+      card.style.opacity=(cardIn*(1-easeInOut(fun))).toFixed(3);
+
+      // unified rows land staggered as the card resolves
+      rows.forEach(function(row,n){
+        var start=0.20+n*0.035, rp=clamp((p-start)/0.06);
+        row.style.opacity=rp.toFixed(3);
+        row.style.transform='translateY('+((1-rp)*8).toFixed(1)+'px)';
+      });
+
+      // timeline line holds, then clears the instant the inbox line arrives
+      if(sideText){
+        sideText.style.opacity=tlTxt.toFixed(3);
+        sideText.style.transform='translateX(-50%) translateY('+((1-clamp((p-0.16)/0.04))*16).toFixed(1)+'px)';
+      }
+      // inbox line (same bottom spot), appears as the timeline line clears
+      if(inboxCap){
+        inboxCap.style.opacity=inTxt.toFixed(3);
+        inboxCap.style.transform='translateX(-50%) translateY('+((1-clamp((p-0.46)/0.04))*16).toFixed(1)+'px)';
+      }
+
+      // ── funnel finale: conversations scatter out, then get pulled into the one inbox ──
+      if(funnelInbox){
+        var tap=clamp(1-Math.abs(p-0.605)/0.014);   // the click dip
+        var inboxIn=clamp((fun-0.30)/0.10);          // items scatter out first; the inbox shows up just before they're pulled in
+        funnelInbox.style.setProperty('--fin',(1-0.06*tap).toFixed(3));
+        funnelInbox.style.setProperty('--finO',(inboxIn*(1-open)).toFixed(3));   // fades out as it opens into triage
+        var landed=0;
+        fchips.forEach(function(c,n){
+          var sx=SCATTER[n][0], sy=SCATTER[n][1];
+          var so=easeOut(clamp(fun/0.42));            // emerge from centre + scatter out
+          var fi=clamp((fun-0.40-n*0.085)/0.34);      // staggered pull back into the inbox
+          var ex=easeInOut(fi);
+          var x=(sx*so)*(1-ex),  y=(sy*so)*(1-ex) + (-46)*ex; // converge up into the icon
+          var sc=(0.5+so*0.5)*(1-ex*0.82);            // shrink right down as it's absorbed
+          var op=clamp(so*1.6)*clamp(1-(fi-0.6)/0.3)*(1-open); // fade out as it lands / opens
+          c.style.transform='translate(-50%,-50%) translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale('+sc.toFixed(3)+')';
+          c.style.opacity=clamp(op).toFixed(3);
+          if(fi>0.6) landed++;
+        });
+        if(fCount){
+          fCount.style.opacity=(landed>0?(1-open):0).toFixed(3);
+          if(landed!==lastLanded){
+            if(landed>0){ fCount.textContent=landed; fCount.classList.remove('pop'); void fCount.offsetWidth; fCount.classList.add('pop'); }
+            lastLanded=landed;
+          }
+        }
+      }
+
+      // the cursor glides to the inbox and taps it open
+      if(cursor){
+        var cShow=clamp((p-0.54)/0.04)*(1-clamp((p-0.655)/0.025));
+        cursor.style.opacity=clamp(cShow).toFixed(3);
+        if(fIco){
+          var sr=scene.getBoundingClientRect(), ir=fIco.getBoundingClientRect();
+          var cx=ir.left+ir.width*0.52-sr.left, cy=ir.top+ir.height*0.62-sr.top;
+          var tp=clamp(1-Math.abs(p-0.605)/0.014);
+          cursor.style.transform='translate('+cx.toFixed(1)+'px,'+cy.toFixed(1)+'px) scale('+(1-0.28*tp).toFixed(3)+')';
+        }
+      }
+
+      // ── triage opens in place; cards get triaged one by one as you scroll ──
+      if(stageTriage){
+        stageTriage.style.opacity=(open*(1-clr)).toFixed(3);
+        stageTriage.style.transform='translate(-50%,-50%) translateY(-82px) scale('+(0.92+open*0.08-clr*0.04).toFixed(3)+')';
+        var N=tgCards.length, TW=0.40, TS=N>1?(0.86-TW)/(N-1):0;  // last card finishes ~triA .86, right as the clear begins
+        var leave=tgCards.map(function(c,n){ return easeInOut(clamp((triA-n*TS)/TW)); });
+        var t={task:0,draft:0,skip:0};
+        tgCards.forEach(function(c,n){
+          var lv=leave[n], depth=0;
+          for(var m=0;m<n;m++){ depth+=(1-leave[m]); }
+          var dir=(TG[n].act==='skip')?-1:1;
+          var tx=dir*150*lv, rot=dir*8*lv, ty=depth*8-lv*4, scl=1-depth*0.04;
+          var op=clamp(1.8-depth*0.7)*(1-lv);
+          c.style.transform='translateX('+tx.toFixed(1)+'px) translateY('+ty.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg) scale('+scl.toFixed(3)+')';
+          c.style.opacity=op.toFixed(3);
+          c.style.zIndex=20-n;
+          if(lv>0.6) t[TG[n].act]++;
+        });
+        ['task','draft','skip'].forEach(function(k){ if(t[k]!==lastTally[k]){ if(tEl[k]) tEl[k].textContent=t[k]; lastTally[k]=t[k]; } });
+        var left=tgCards.length-(t.task+t.draft+t.skip);
+        if(tgCount) tgCount.textContent=left>0?left+' to triage':'all clear';
+        var hot=-1;
+        for(var q=0;q<tgCards.length;q++){ if(leave[q]>0.12&&leave[q]<0.9){ hot=q; break; } }
+        ['task','draft','skip'].forEach(function(k){ if(btns[k]) btns[k].classList.remove('hot'); });
+        if(hot>=0&&btns[TG[hot].act]) btns[TG[hot].act].classList.add('hot');
+      }
+
+      // cleared: the inbox returns green, holds, then opens into the task list (same pin)
+      var iOut=clamp((pf-0.03)/0.10);          // the green inbox opening away
+      var cIn=easeOut(clamp((pf-0.05)/0.12));  // the task card opening up in its place
+      if(stageCleared){
+        stageCleared.style.opacity=(clr*(1-iOut)).toFixed(3);
+        stageCleared.style.transform='translate(-50%,-50%) translateY(-82px) scale('+(0.9+clr*0.1-iOut*0.22).toFixed(3)+')';
+      }
+      // keep the triage caption up through the clear / "all cleared" done beat — fade only as the task list opens
+      if(triageCap) triageCap.style.opacity=(clamp((p-0.66)/0.04)*(1-iOut)).toFixed(3);
+
+      // ── final stretch: last task checks → cap swap → card exits → lists open ──
+      var out     = clamp((pf-0.58)/0.08);   // task card scrolls out only after the cap3 swap
+      var listsIn = easeOut(clamp((pf-0.64)/0.30));  // boards + footer after headline parks
+      var sceneH  = scene.clientHeight||520;
+
+      // the guided task list — lifts as it opens, then exits upward
+      if(finWrap){
+        finWrap.style.opacity=(cIn*(1-out)).toFixed(3);
+        finWrap.style.transform='translate(-50%,-50%) translateY('+(-82 - out*sceneH*0.7).toFixed(1)+'px) scale('+(0.9+cIn*0.1-out*0.06).toFixed(3)+')';
+        finWrap.style.pointerEvents=out>0.5?'none':'auto';
+      }
+      var finGuide=clamp((pf-0.30)/0.32);   // thread messages arrive, then rows check off (slower)
+      var capLoop=clamp((pf-0.14)/0.03)*(1-clamp((pf-0.52)/0.04)); // one caption for the whole task-list beat
+      var capMsgvis=clamp((pf-0.30)/0.03)*(1-clamp((pf-0.50)/0.04)); // thread pings only during the loop phase
+      var finDone=0, finProgress=0;
+      finItems.forEach(function(el,n){
+        var bin=easeOut(clamp((pf-0.14-n*0.05)/0.15));   // tasks land in, staggered
+        var thr=finGuide-n*0.22;
+        var gp=clamp(thr/0.18);                           // this task's completion
+        finProgress+=easeOut(gp);
+        el.style.opacity=bin.toFixed(3);
+        el.style.transform='translateY('+((1-bin)*-14).toFixed(1)+'px)';
+        el.classList.toggle('done',gp>0.5);
+        el.classList.toggle('focus',gp>0.06&&gp<0.94);
+        el.classList.toggle('checking',gp>0.32&&gp<0.78);
+        if(gp>0.5) finDone++;
+        var msg=finMsgs[n];
+        if(msg){
+          var msgIn=easeOut(clamp((thr-0.01)/0.07));
+          msg.style.opacity=(capMsgvis*msgIn).toFixed(3);
+          msg.style.transform='scale('+(0.9+msgIn*0.1).toFixed(3)+')';
+          var line=msg.querySelector('.fin-msg-line');
+          if(line) line.style.width=(msgIn*32).toFixed(0)+'px';
+          var spark=msg.querySelector('.fin-spark');
+          if(spark) spark.style.opacity=(gp>0.38&&gp<0.82?0.9:0).toFixed(3);
+        }
+      });
+      if(finDone!==finLastDone){
+        if(finProg) finProg.textContent=finDone>=finN?'all done':finDone+' of '+finN+' done';
+        finLastDone=finDone;
+      }
+      if(finFill) finFill.style.transform='scaleX('+(finProgress/(finN||1)).toFixed(4)+')';
+      if(finCap1) finCap1.style.opacity=capLoop.toFixed(3);
+      // cap3 replaces cap2 once the last task is checked, then rides up as the card exits
+      if(finCap3){
+        finCap3.style.opacity=clamp((pf-0.55)/0.03).toFixed(3);
+        finCap3.style.transform='translateX(-50%) translateY('+(-out*sceneH*0.88).toFixed(1)+'px)';
+      }
+      if(finExplore) finExplore.style.opacity=easeOut(clamp((listsIn-0.12)/0.38)).toFixed(3);
+      // the three task lists open in a row beneath the parked headline
+      if(finListsEl){
+        finListsEl.style.opacity=listsIn.toFixed(3);
+        finListsEl.style.transform='translate(-50%,-50%) translateY('+((1-listsIn)*22).toFixed(1)+'px)';
+        finListsEl.style.pointerEvents=listsIn>0.6?'auto':'none';
+      }
+      if(finFooter) finFooter.style.opacity=listsIn.toFixed(3);
+
+      // caption holds while centred, fades as the text and then the funnel arrive
+      if(stageCap) stageCap.style.opacity=clamp(Math.min(cardIn,1-topT*1.6,1-fun*2)).toFixed(3);
+    }
+    function onScroll(){ if(!raf) raf=requestAnimationFrame(sync); }
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',onScroll);
+    sync();
+  }
+
+  // ── views: one timeline, sliced ──
+  (function(){
+    var body=document.getElementById('viewBody');
+    if(!body) return;
+    var M='linear-gradient(120deg,#f2994a,#eb5757)', S='linear-gradient(120deg,#7b5cff,#9d7bff)',
+        G='linear-gradient(120deg,#34d399,#10b981)', V='#111';
+    function row(bg,ic,who,txt){return '<div class="vrow"><span class="src" style="background:'+bg+'">'+ic+'</span><div><span class="vw">'+who+'</span> <span class="vx">'+txt+'</span></div></div>';}
+    function task(done,txt){return '<div class="vrow'+(done?' done':'')+'"><span class="vchk"></span><span class="vx">'+txt+'</span></div>';}
+    var VIEWS={
+      client:'<div class="vgroup"><div class="vg-h">Acme Studio <span class="vg-n">4 channels</span></div>'+
+        row(M,'M','Maya','— push the launch to Friday?')+row(S,'#','Dani','— wants the new logo in too')+
+        row(G,'✦','Kickoff','— Friday launch, logo Wed')+row(V,'▲','Deploy','— acme-site v2.4 live')+'</div>',
+      conversation:'<div class="vgroup"><div class="vg-h">Launch date</div>'+
+        row(M,'M','Maya','— can we push to Friday?')+row(G,'✦','Kickoff','— agreed, Friday it is')+'</div>'+
+        '<div class="vgroup"><div class="vg-h">The new logo</div>'+
+        row(S,'#','Dani','— Acme wants it in the launch')+row(G,'✦','Kickoff','— logo by Wednesday')+'</div>',
+      task:'<div class="vgroup"><div class="vg-h">Pulled from the thread <span class="vg-n">3 tasks</span></div>'+
+        task(false,'Reply to Maya — confirm Friday launch')+task(false,'Add the logo to launch scope')+
+        task(true,'Deploy v2.4 — logged')+'</div>'
+    };
+    function set(v){ body.innerHTML='<div class="vfade">'+VIEWS[v]+'</div>'; }
+    document.querySelectorAll('.vt').forEach(function(b){
+      b.addEventListener('click',function(){
+        document.querySelectorAll('.vt').forEach(function(x){x.classList.remove('on');});
+        b.classList.add('on'); set(b.dataset.v);
+      });
+    });
+    set('client');
+  })();
+
+  // ── hero task list (join / share / who) ──
+  function valid(v){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);}
+  function nudge(el){ if(!el)return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+  var state={join:false,share:false,confess:false};
+  var taskJoin=document.getElementById('task');
+  var formHero=document.getElementById('form-hero');
+  var formFin=document.getElementById('form-fin');
+  var doneMsg=document.getElementById('doneMsg');
+  function syncExItems(){
+    var ej=document.getElementById('exJoin');
+    var es=document.getElementById('outroShareBtn');
+    var ec=document.getElementById('exConfess');
+    if(ej) ej.classList.toggle('done',state.join);
+    if(es) es.classList.toggle('done',state.share);
+    if(ec) ec.classList.toggle('done',state.confess);
+    var cc=document.getElementById('exConfessCount');
+    if(cc) cc.textContent=state.confess?'done':'1 to do';
+    var todo=(!state.join?1:0)+(!state.share?1:0);
+    var sc=document.getElementById('exStartedCount');
+    if(sc) sc.textContent=todo?(todo+' to do'):'done';
+  }
+  function allDone(){ return state.join&&state.share&&state.confess; }
+  function refreshHead(){
+    if(state.join && allDone()){
+      head.classList.remove('over');
+      head.textContent="All done for today.";
+    } else if(state.join){
+      head.classList.remove('over');
+      head.textContent="Nice — one down.";
+    } else {
+      applyDue();
+    }
+  }
+
+  function setJoin(on){
+    state.join=on;
+    taskJoin.classList.toggle('done',on);
+    try{ on?localStorage.setItem(KEY+'_join','1'):localStorage.removeItem(KEY+'_join'); }catch(_){}
+    if(on){
+      var sub="You're on the list";
+      var n=window.ZaliCms&&window.ZaliCms.waitlistCount;
+      if(n) sub+=" · #"+n;
+      document.getElementById('doneSub').textContent=sub;
+      document.getElementById('dmH').textContent=allDone()?"All three. Look at you go.":"One down. See how easy that was?";
+      doneMsg.classList.add('show');
+    }else{
+      doneMsg.classList.remove('show');
+      [formHero,formFin].forEach(function(f){
+        if(!f) return;
+        var inp=f.querySelector('input');
+        if(inp){ inp.value=''; inp.style.borderColor=''; }
+      });
+    }
+    syncExItems();
+    refreshHead();
+  }
+  function setShare(on,how){
+    state.share=on;
+    document.querySelector('[data-key="share"]').classList.toggle('done',on);
+    try{ on?localStorage.setItem(KEY+'_share','1'):localStorage.removeItem(KEY+'_share'); }catch(_){}
+    var note=on?(how==='copied'?'link copied ✓':'thanks ✓'):'';
+    var sn=document.getElementById('shareNote'); if(sn) sn.textContent=note;
+    var fsn=document.getElementById('finShareNote'); if(fsn) fsn.textContent=note;
+    var csn=document.getElementById('ctaShareNote'); if(csn) csn.textContent=note;
+    syncExItems();
+    refreshHead();
+  }
+  function setConfess(on){
+    state.confess=on;
+    document.querySelector('[data-key="confess"]').classList.toggle('done',on);
+    try{ on?localStorage.setItem(KEY+'_confessed','1'):localStorage.removeItem(KEY+'_confessed'); }catch(_){}
+    syncExItems();
+    refreshHead();
+  }
+
+  // JOIN — submit checks it, circle toggles/resets, premature click shakes input
+  function joinDone(input,fromCta){
+    if(typeof window.onWaitlistSuccess==='function'){ try{window.onWaitlistSuccess(input.value);}catch(_){} }
+    setJoin(true);
+    if(!fromCta){
+      var ry=taskJoin.getBoundingClientRect().top+window.scrollY-(window.innerHeight/2)+(taskJoin.offsetHeight/2);
+      if(window.ZaliScrollTo) window.ZaliScrollTo(Math.max(0,ry));
+      else window.scrollTo({top:Math.max(0,ry),behavior:'smooth'});
+    }
+  }
+  function joinSubmit(e,fromCta){
+    e.preventDefault();
+    var input=e.target.querySelector('input');
+    if(!valid(input.value)){ nudge(input); input.focus(); input.style.borderColor='var(--over)'; return; }
+    input.style.borderColor='';
+    var btn=e.target.querySelector('button[type=submit]');
+    if(btn) btn.disabled=true;
+    fetch('/api/waitlist',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:input.value.trim().toLowerCase(),source:fromCta?'finale':'hero'})
+    }).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+      .then(function(res){
+        if(!res.ok&&res.data&&res.data.error){
+          nudge(input); input.focus(); input.style.borderColor='var(--over)';
+          if(btn) btn.disabled=false;
+          return;
+        }
+        joinDone(input,fromCta);
+        if(btn) btn.disabled=false;
+      })
+      .catch(function(){
+        joinDone(input,fromCta);
+        if(btn) btn.disabled=false;
+      });
+  }
+  if(formHero) formHero.addEventListener('submit',function(e){joinSubmit(e,false);});
+  if(formFin) formFin.addEventListener('submit',function(e){joinSubmit(e,true);});
+
+  document.getElementById('boxJoin').addEventListener('click',function(){
+    if(state.join){ setJoin(false); return; }
+    var input=formHero.querySelector('input');
+    nudge(input); input.focus();
+  });
+
+  // SHARE — share/copy checks it; circle also triggers share
+  function legacyCopy(text){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=text; ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,text.length);
+      var ok=document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    }catch(_){ return false; }
+  }
+  function shareAct(){
+    if(state.share){ setShare(false); return; }
+    var url=location.href.split('#')[0];
+    var data={title:'zali',text:'Your inbox becomes a to-do list — and gets itself done.',url:url};
+    if(navigator.share){
+      navigator.share(data)
+        .then(function(){setShare(true,'shared');})
+        .catch(function(){ // share unavailable/blocked or cancelled → copy instead
+          if(navigator.clipboard&&navigator.clipboard.writeText){
+            navigator.clipboard.writeText(url).then(function(){setShare(true,'copied');})
+              .catch(function(){ setShare(true, legacyCopy(url)?'copied':'shared'); });
+          } else { setShare(true, legacyCopy(url)?'copied':'shared'); }
+        });
+    } else if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){setShare(true,'copied');})
+        .catch(function(){ setShare(true, legacyCopy(url)?'copied':'shared'); });
+    } else {
+      setShare(true, legacyCopy(url)?'copied':'shared');
+    }
+  }
+  document.getElementById('shareBtn').addEventListener('click',shareAct);
+  document.getElementById('boxShare').addEventListener('click',shareAct);
+  var finShareBtn=document.getElementById('finShareBtn');
+  if(finShareBtn) finShareBtn.addEventListener('click',shareAct);
+
+  // Task board — tick it off, let the check land, then head to board.zali.so
+  var BOARD_URL='https://board.zali.so';
+  function goConfess(){
+    setConfess(true);
+    setTimeout(function(){
+      if(window.ZaliLoader){ ZaliLoader.go(BOARD_URL); } else { location.href=BOARD_URL; }
+    },360);
+  }
+  var confessLink=document.getElementById('confessLink');
+  if(confessLink) confessLink.addEventListener('click',function(e){ e.preventDefault(); goConfess(); });
+  var finConfessBtn=document.getElementById('finConfessBtn');
+  if(finConfessBtn) finConfessBtn.addEventListener('click',function(e){ e.preventDefault(); goConfess(); });
+  var finConfessFoot=document.getElementById('finConfessFoot');
+  if(finConfessFoot) finConfessFoot.addEventListener('click',function(e){ e.preventDefault(); goConfess(); });
+  document.getElementById('boxConfess').addEventListener('click',function(){
+    if(state.confess){ setConfess(false); return; }
+    goConfess();
+  });
+  // restore ticks if they already completed hero tasks
+  try{
+    if(localStorage.getItem(KEY+'_join')==='1') setJoin(true);
+    if(localStorage.getItem(KEY+'_share')==='1') setShare(true,'shared');
+    if(localStorage.getItem(KEY+'_confessed')==='1') setConfess(true);
+  }catch(_){}
+  syncExItems();
+
+  // ── confessions teaser: keep the count live with the full wall ──
+  (function(){
+    var countEl=document.getElementById('confessCount');
+    if(!countEl) return;
+    var base=1204;
+    try{ base+=(JSON.parse(localStorage.getItem(KEY+'_confess')||'[]')||[]).length; }catch(_){}
+    countEl.textContent=base.toLocaleString();
+  })();
+
+  // ── task board: tiny live sticky preview in the finale card ──
+  (function(){
+    var FALLBACK=[
+      {text:"Send the invoice I 'finished' two weeks ago.",done:true,color:'#C3F3B0'},
+      {text:'Reply to the client who emailed nine days ago.',done:false,color:'#F9E4A8'},
+      {text:'Follow up on the quote. Again.',done:false,color:'#D4E8F7'},
+      {text:'Cancel the trial before it charges me.',done:true,color:'#E8C4F0'},
+      {text:'Chase the deposit before I start the work.',done:false,color:'#C3F3B0'}
+    ];
+    var SLOTS=[
+      {left:'0%',top:'6px',rot:'-5deg',z:2},
+      {left:'22%',top:'16px',rot:'2deg',z:3},
+      {left:'44%',top:'2px',rot:'-1deg',z:1},
+      {left:'64%',top:'18px',rot:'4deg',z:4},
+      {left:'82%',top:'8px',rot:'-3deg',z:2}
+    ];
+    function clip(text,len){
+      var s=(text||'').trim();
+      if(s.length<=len) return s;
+      return s.slice(0,len-1)+'…';
+    }
+    function addMiniSticky(parent,item,i){
+      var slot=SLOTS[i%SLOTS.length];
+      var c=document.createElement('div');
+      c.className='mini-sticky'+(item.done?' done':'')+(item.font?' font-'+item.font:'');
+      c.style.left=slot.left;
+      c.style.top=slot.top;
+      c.style.zIndex=String(slot.z);
+      c.style.setProperty('--rot',slot.rot);
+      c.style.background=item.color||'#C3F3B0';
+      c.textContent=clip(item.text,52);
+      c.title=item.text||'';
+      parent.appendChild(c);
+    }
+    function renderPreview(items){
+      var finPrev=document.getElementById('finConfessPreview');
+      if(!finPrev) return;
+      finPrev.replaceChildren();
+      var rows=items&&items.length?items:FALLBACK;
+      rows.slice(0,5).forEach(function(item,i){ addMiniSticky(finPrev,item,i); });
+      finPrev.removeAttribute('aria-hidden');
+    }
+    fetch('/api/landing/board?limit=5&open=1')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var items=(data&&data.items)||[];
+        if(!items.length){
+          return fetch('/api/landing/board?limit=5').then(function(r){ return r.json(); });
+        }
+        return {items:items};
+      })
+      .then(function(data){ renderPreview((data&&data.items)||[]); })
+      .catch(function(){ renderPreview(FALLBACK); });
+  })();
+})();
+</script>
+<script>
+(function(){
+  var KEY='zali_theme';
+  var root=document.documentElement, btn=document.getElementById('themeToggle');
+  try{var s=localStorage.getItem(KEY); if(s==='dark') root.classList.remove('light'); else if(s==='light') root.classList.add('light');}catch(e){}
+  if(btn) btn.addEventListener('click',function(){
+    root.classList.toggle('light');
+    try{localStorage.setItem(KEY, root.classList.contains('light')?'light':'dark');}catch(e){}
+  });
+})();
+</script>
+<script src="/zali-loader.js"></script>
+</body>
+</html>

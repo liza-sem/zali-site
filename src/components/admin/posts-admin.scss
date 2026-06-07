@@ -1,0 +1,113 @@
+.posts-view-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.posts-view-toggle__btn--active {
+  background: var(--theme-elevation-150);
+}
+
+.posts-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.posts-admin-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: var(--theme-elevation-50);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    border-color: var(--theme-elevation-300);
+    box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.posts-admin-card__cover {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, #f3e8d8, #e8d2bc);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &--external {
+    background: linear-gradient(135deg, #ece8ff, #d8d0ff);
+  }
+}
+
+.posts-admin-card__glyph {
+  font-size: 1.5rem;
+  opacity: 0.55;
+}
+
+.posts-admin-card__body {
+  padding: 0.85rem 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 7.5rem;
+}
+
+.posts-admin-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--theme-elevation-500);
+}
+
+.posts-admin-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.posts-admin-card__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.posts-admin-card__badge {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-600);
+
+  &--live {
+    background: rgba(46, 125, 70, 0.12);
+    color: #2e7d46;
+  }
+
+  &--landing {
+    background: rgba(111, 75, 42, 0.12);
+    color: #6f4b2a;
+  }
+}

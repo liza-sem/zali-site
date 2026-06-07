@@ -1,0 +1,73 @@
+/* Pixel grid page transition */
+.zali-loader-shell,
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: transparent;
+  display: none;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html.zali-reveal .zali-loader-shell,
+html.zali-reveal #loader {
+  display: grid !important;
+}
+
+#loader.done {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s 0.35s;
+}
+
+.lg-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: 0;
+}
+
+.lg-cell {
+  background: var(--loader-paper, #f7f0de);
+  will-change: opacity;
+  transition: opacity 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lg-cell.out {
+  opacity: 0;
+}
+
+.lg-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  transition:
+    opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lg-logo .lg-name {
+  font-family: 'TenPoint', 'Space Grotesk', system-ui, sans-serif;
+  font-weight: normal;
+  font-size: 2.5rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--loader-ink, #211e18);
+}
+
+.lg-logo.out {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+@media (max-width: 640px) {
+  .lg-logo .lg-name {
+    font-size: 2rem;
+  }
+}
