@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import type { Media } from '@/payload-types'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Posts · Zali',
   description: 'Posts from Zali.',

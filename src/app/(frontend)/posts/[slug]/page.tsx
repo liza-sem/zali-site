@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import { getPayloadClient } from '@/lib/payload'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }
