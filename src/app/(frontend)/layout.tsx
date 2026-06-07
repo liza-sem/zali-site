@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: 'Join the waitlist',
   description: 'Join the waitlist',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
   openGraph: {
     title: 'Join the waitlist',
     description: 'Join the waitlist',

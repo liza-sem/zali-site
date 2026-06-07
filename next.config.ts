@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
         destination: '/api/landing/posts',
         permanent: true,
       },
+      { source: '/favicon.ico', destination: '/favicon.png', permanent: true },
     ]
   },
   images: {

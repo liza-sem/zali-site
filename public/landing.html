@@ -1555,7 +1555,9 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
   window.ZaliScrollTo=function(y,immediate){
     lenis.scrollTo(y,{immediate:!!immediate});
   };
-  lenis.on('scroll',function(){ window.dispatchEvent(new Event('scroll')); });
+  lenis.on('scroll',function(){
+    if(window.ZaliOnScroll) window.ZaliOnScroll();
+  });
 })();
 </script>
 <script>
@@ -1752,7 +1754,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
     var stageStart=0, stageTravel=1;
     function snap(n){return isTouch?Math.round(n):+n.toFixed(1);}
     function px(n){return snap(n)+'px';}
-    function q(v){return isIOS?Math.round(v*200)/200:v;}
+    function quantize(v){return isIOS?Math.round(v*200)/200:v;}
     function measureStage(){
       viewH=window.innerHeight;
       stageStart=stage.getBoundingClientRect().top+(window.scrollY||document.documentElement.scrollTop||0);
@@ -1770,7 +1772,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       var raw;
       if(isIOS){
         var sy=Math.round(window.scrollY||document.documentElement.scrollTop||0);
-        raw=q(clamp((sy-stageStart)/stageTravel));
+        raw=quantize(clamp((sy-stageStart)/stageTravel));
         if(stageSticky){
           if(sy<stageStart){
             stageSticky.classList.remove('is-pinned','is-past');
@@ -1787,14 +1789,14 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
         viewH=window.innerHeight;
         var stageTop=r.top;
         var travel=r.height-viewH;
-        raw=q(clamp((0-stageTop)/(travel||1)));
+        raw=quantize(clamp((0-stageTop)/(travel||1)));
       }
       // first part of the pin is the tools→triage story; the rest is the cleared inbox → task list → outro lists
       var SPLIT=0.72;
-      var p=q(clamp(raw/SPLIT));
+      var p=quantize(clamp(raw/SPLIT));
       // finale tail: clean focused view + task list
       var pfRaw=clamp((raw-SPLIT)/(1-SPLIT));
-      var pf=q(clamp(pfRaw/0.66));
+      var pf=quantize(clamp(pfRaw/0.66));
       stage.style.setProperty('--p',p.toFixed(3));
 
       // beat segments
@@ -1813,7 +1815,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       var trTxt    = clamp((p-0.60)/0.04) * (1 - clamp((p-0.86)/0.04));          // triage  .60–.90
 
       // apps converge into the centre
-      orbit.style.setProperty('--conv',q(conv).toFixed(3));
+      orbit.style.setProperty('--conv',quantize(conv).toFixed(3));
       // mobile: gentle scroll parallax — icons drift up as you scroll into the tools beat
       if(innerWidth<=760&&!isIOS){
         var drift=snap(-clamp((p-0.02)/0.18)*12*(1-conv*0.85));
@@ -1915,7 +1917,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
         var left=tgCards.length-(t.task+t.draft+t.skip);
         if(tgCount) tgCount.textContent=left>0?left+' to triage':'all clear';
         var hot=-1;
-        for(var q=0;q<tgCards.length;q++){ if(leave[q]>0.12&&leave[q]<0.9){ hot=q; break; } }
+        for(var qi=0;qi<tgCards.length;qi++){ if(leave[qi]>0.12&&leave[qi]<0.9){ hot=qi; break; } }
         ['task','draft','skip'].forEach(function(k){ if(btns[k]) btns[k].classList.remove('hot'); });
         if(hot>=0&&btns[TG[hot].act]) btns[TG[hot].act].classList.add('hot');
       }
@@ -2030,6 +2032,7 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
     function onScroll(){
       if(!raf) raf=requestAnimationFrame(sync);
     }
+    window.ZaliOnScroll=onScroll;
     window.addEventListener('scroll',onScroll,{passive:true});
     if(!isIOS) window.addEventListener('resize',onScroll);
     sync();
