@@ -23,7 +23,6 @@ export default function LandingFrame({ section }: LandingFrameProps) {
         height: '100%',
         border: 'none',
         display: 'block',
-        overflow: 'hidden',
       }}
     />
   )
