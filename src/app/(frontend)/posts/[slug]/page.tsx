@@ -71,7 +71,7 @@ export default async function PostPage({ params }: PageProps) {
   const post = docs[0]
   if (!post || post.postType === 'external') notFound()
 
-  const html = convertLexicalToHTML({ data: post.content })
+  const html = post.content ? convertLexicalToHTML({ data: post.content }) : ''
   const cover =
     post.coverImage && typeof post.coverImage === 'object' && post.coverImage.url
       ? post.coverImage
@@ -86,7 +86,7 @@ export default async function PostPage({ params }: PageProps) {
       <h1>{post.title}</h1>
       <div className="posts-article-meta">{formatDate(post.publishedAt)}</div>
 
-      {cover ? (
+      {cover?.url ? (
         <div className="posts-cover">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={cover.url} alt={cover.alt || post.title} />

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 import { slugField } from 'payload'
 import { landingCardFields, seoFields } from '@/lib/landing-card-fields'
 
@@ -83,7 +83,10 @@ export const Posts: CollectionConfig = {
               name: 'content',
               type: 'richText',
               admin: { condition: isWrite },
-              validate: (value, { siblingData }) => {
+              validate: (
+                value: unknown,
+                { siblingData }: { siblingData?: { postType?: string } },
+              ) => {
                 if (siblingData?.postType === 'external') return true
                 if (!value) return 'Content is required for written posts'
                 return true
@@ -96,9 +99,12 @@ export const Posts: CollectionConfig = {
                 condition: isExternal,
                 description: 'Full URL including https://',
               },
-              validate: (value, { siblingData }) => {
+              validate: (
+                value: unknown,
+                { siblingData }: { siblingData?: { postType?: string } },
+              ) => {
                 if (siblingData?.postType !== 'external') return true
-                if (!value) return 'URL is required for external links'
+                if (!value || typeof value !== 'string') return 'URL is required for external links'
                 if (!/^https?:\/\/.+/.test(value)) return 'Enter a valid http(s) URL'
                 return true
               },
@@ -129,20 +135,7 @@ export const Posts: CollectionConfig = {
                 date: { pickerAppearance: 'dayAndTime' },
               },
             },
-            ...landingCardFields.map((field) => ({
-              ...field,
-              ...(field.admin
-                ? {
-                    admin: {
-                      ...field.admin,
-                      description:
-                        field.name === 'showOnLanding'
-                          ? 'Show in the landing page Posts card.'
-                          : field.admin.description,
-                    },
-                  }
-                : {}),
-            })),
+            ...landingCardFields,
           ],
         },
         {
@@ -151,7 +144,7 @@ export const Posts: CollectionConfig = {
           fields: seoFields.map((field) => ({
             ...field,
             admin: { ...field.admin, condition: isWrite },
-          })),
+          })) as Field[],
         },
       ],
     },
