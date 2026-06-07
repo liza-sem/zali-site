@@ -1144,6 +1144,9 @@ html.touch .side-text,
 html.touch .fin-cap,
 html.touch .fin-lists{will-change:auto}
 html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
+html.zali-iframe #loader{display:none!important;pointer-events:none!important}
+/* iOS Safari auto-zooms focused inputs below 16px and the page can stay stuck zoomed */
+html.touch input.field,html.touch textarea.field,html.touch select.field{font-size:16px}
 
 </style>
 <link rel="stylesheet" href="/zali-loader.css">
@@ -1151,16 +1154,21 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
   var r=document.documentElement;
   var touch=matchMedia('(hover:none) and (pointer:coarse)').matches||matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);
   if(touch) r.classList.add('touch');
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)) r.classList.add('ios');
-  var vh=window.innerHeight*0.01;
-  r.style.setProperty('--vh',vh+'px');
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){
-    window.addEventListener('orientationchange',function(){setTimeout(function(){
-      r.style.setProperty('--vh',window.innerHeight*0.01+'px');
-    },120);});
+  var isAppleMobile=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(isAppleMobile) r.classList.add('ios');
+  function setVh(){
+    var h=(window.visualViewport?window.visualViewport.height:window.innerHeight)*0.01;
+    r.style.setProperty('--vh',h+'px');
   }
+  setVh();
+  if(isAppleMobile){
+    window.addEventListener('orientationchange',function(){setTimeout(setVh,120);});
+    if(window.visualViewport) window.visualViewport.addEventListener('resize',function(){setTimeout(setVh,80);});
+  }
+  var inFrame=false;try{inFrame=window.self!==window.top;}catch(_){inFrame=true;}
+  if(inFrame) r.classList.add('zali-iframe');
   var p=new URLSearchParams(location.search);var s=false;try{s=sessionStorage.getItem('zali_nav')==='1';}catch(_){}
-  if(p.get('zali_nav')==='1'||s){r.classList.add('zali-reveal');}
+  if(!inFrame&&(p.get('zali_nav')==='1'||s)) r.classList.add('zali-reveal');
 }catch(_){}})();</script>
 <link id="gfont-Playfair-Display" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&amp;display=swap">
 <link id="gfont-Righteous" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous:wght@300;400;500;600;700&amp;display=swap">
@@ -1746,30 +1754,59 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
     var viewH=window.innerHeight;
     var stageStart=0, stageTravel=1;
     var iosRaw=0, lastIosSy=0, iosScrollActive=false, iosIdleTimer=null;
+    var iosRaf=null;
     function snap(n){
       if(isIOS) return +n.toFixed(2);
       return isTouch?Math.round(n):+n.toFixed(1);
     }
     function px(n){return snap(n)+'px';}
+    function readViewH(){
+      return window.visualViewport?window.visualViewport.height:window.innerHeight;
+    }
     function measureStage(){
-      viewH=window.innerHeight;
+      viewH=readViewH();
       var sy=window.scrollY||document.documentElement.scrollTop||0;
+      var hadPin=false, hadPast=false;
+      if(stageSticky&&isIOS){
+        hadPin=stageSticky.classList.contains('is-pinned');
+        hadPast=stageSticky.classList.contains('is-past');
+        stageSticky.classList.remove('is-pinned','is-past');
+        void stage.offsetHeight;
+      }
       stageStart=stage.getBoundingClientRect().top+sy;
       stageTravel=Math.max(1,stage.offsetHeight-viewH);
+      if(stageSticky&&isIOS){
+        if(hadPin) stageSticky.classList.add('is-pinned');
+        else if(hadPast) stageSticky.classList.add('is-past');
+      }
       if(isIOS){
         iosRaw=clamp((sy-stageStart)/stageTravel);
         lastIosSy=sy;
       }
     }
+    function remeasureSoon(){
+      measureStage();
+      scheduleIosSync();
+    }
     measureStage();
+    requestAnimationFrame(function(){ requestAnimationFrame(remeasureSoon); });
     if(isIOS){
-      window.addEventListener('orientationchange',function(){setTimeout(measureStage,200);});
-      window.addEventListener('load',measureStage);
+      window.addEventListener('orientationchange',function(){ setTimeout(remeasureSoon,250); });
+      window.addEventListener('load',remeasureSoon);
+      window.addEventListener('pageshow',function(e){
+        if(stageSticky) stageSticky.classList.remove('is-pinned','is-past');
+        remeasureSoon();
+      });
+      if(window.visualViewport){
+        window.visualViewport.addEventListener('resize',function(){ setTimeout(remeasureSoon,80); });
+      }
+      if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(remeasureSoon); }
     }
 
     var raf=null;
     function sync(){
       raf=null;
+      if(!orbit||!stage) return;
       var raw;
       if(isIOS){
         var sy=window.scrollY||document.documentElement.scrollTop||0;
@@ -2042,15 +2079,28 @@ html.touch:not(.ios) .scene{overflow-x:clip;overflow-y:visible}
       // caption holds while centred, fades as the text and then the funnel arrive
       if(stageCap) stageCap.style.opacity=clamp(Math.min(cardIn,1-topT*1.6,1-fun*2)).toFixed(3);
     }
+    function needsIosFrame(){
+      if(iosScrollActive) return true;
+      var sy=window.scrollY||document.documentElement.scrollTop||0;
+      var targetRaw=clamp((sy-stageStart)/stageTravel);
+      return Math.abs(targetRaw-iosRaw)>0.0005;
+    }
+    function iosTick(){
+      iosRaf=null;
+      sync();
+      if(needsIosFrame()) iosRaf=requestAnimationFrame(iosTick);
+    }
+    function scheduleIosSync(){
+      if(!iosRaf) iosRaf=requestAnimationFrame(iosTick);
+    }
     function onScroll(){
-      if(!raf) raf=requestAnimationFrame(sync);
+      if(isIOS) scheduleIosSync();
+      else if(!raf) raf=requestAnimationFrame(sync);
     }
     window.ZaliOnScroll=onScroll;
     if(isIOS){
-      (function iosFrame(){
-        sync();
-        requestAnimationFrame(iosFrame);
-      })();
+      window.addEventListener('scroll',onScroll,{passive:true});
+      scheduleIosSync();
     }else{
       window.addEventListener('scroll',onScroll,{passive:true});
       window.addEventListener('resize',onScroll);
