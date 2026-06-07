@@ -1,13 +1,20 @@
 'use client'
 
+type LandingFrameProps = {
+  /** Scroll landing to this section on load (e.g. "waitlist" → #waitlist). */
+  section?: string
+}
+
 /**
  * Serves Zali.html from /landing.html. CMS content is hydrated client-side via
  * /api/landing/posts and /api/site-settings (see cms-bridge.js).
  */
-export default function LandingFrame() {
+export default function LandingFrame({ section }: LandingFrameProps) {
+  const src = section ? `/landing.html#${section}` : '/landing.html'
+
   return (
     <iframe
-      src="/landing.html"
+      src={src}
       title="Zali"
       style={{
         position: 'fixed',
@@ -16,6 +23,7 @@ export default function LandingFrame() {
         height: '100%',
         border: 'none',
         display: 'block',
+        overflow: 'hidden',
       }}
     />
   )
