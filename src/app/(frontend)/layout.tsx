@@ -17,7 +17,7 @@ export default function FrontendLayout(props: { children: React.ReactNode }) {
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/zali-loader.js" />
       </head>
-      <body style={{ margin: 0, overflowX: 'hidden' }}>
+      <body style={{ margin: 0 }}>
         <ZaliLoader />
         <Suspense fallback={null}>
           <ZaliNavBridge />

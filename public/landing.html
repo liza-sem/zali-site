@@ -18,7 +18,7 @@
   font-display:swap;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:auto;overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
+html{scroll-behavior:auto;max-width:100%}
 :root{
   /* ── vintage palette: warm aged paper, espresso ink, muted retro primaries ── */
   --bg:#EFE7D4; --card:#F7F0DE; --surface:rgba(58,45,28,.05);
@@ -37,7 +37,7 @@ html{scroll-behavior:auto;overflow-x:hidden;max-width:100%;overscroll-behavior-x
   --ease:cubic-bezier(.2,.8,.2,1);
   --loader-paper:#F7F0DE; --loader-ink:#211E18;
 }
-body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;max-width:100%;overscroll-behavior:none;touch-action:pan-y;letter-spacing:-.005em;
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;max-width:100%;overscroll-behavior-y:none;touch-action:pan-y;letter-spacing:-.005em;
   background:
     radial-gradient(115% 70% at 50% -12%, rgba(50,79,134,.07), transparent 58%),
     radial-gradient(90% 60% at 100% 108%, rgba(192,73,46,.06), transparent 60%),
@@ -244,8 +244,8 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 
 /* ── converge: a pinned scene — centered → timeline → push aside → by conversation ── */
-.stage{position:relative;height:700vh;margin-top:22px;--p:0;width:100%;max-width:100%;margin-left:0}
-.stage-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+.stage{position:relative;height:620vh;margin-top:22px;--p:0;width:100%;max-width:100%;margin-left:0}
+.stage-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%);
   mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 100%)}
 .orbit{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;--R:clamp(176px,20vw,280px);--conv:0;
@@ -503,23 +503,24 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
   .lead{margin-top:18px}
   .side-text .st-msg .lead,.triage-cap .lead,.fin-cap .lead{margin-top:12px}
   .side-text,.triage-cap,.fin-cap{bottom:6%;width:min(560px,92vw)}
-  /* clean-view beat: thread pings stack above the task card */
+  /* clean-view beat: thread pings above the task card */
   .fin-wrap{
-    display:flex;
-    flex-direction:column;
-    align-items:stretch;
+    display:grid;
+    grid-template-rows:auto auto;
+    align-content:start;
     width:min(462px,94vw);
     gap:10px;
   }
   .fin-threads{
     position:relative;
     inset:auto;
-    order:1;
+    grid-row:1;
     display:flex;
     flex-direction:column;
     gap:8px;
     margin:0;
     padding:0 2px;
+    z-index:3;
   }
   .fin-msg{
     position:relative;
@@ -531,7 +532,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify
     justify-content:flex-start;
   }
   .fin-msg--1{justify-content:flex-end}
-  .fin-card{order:2;flex-shrink:0}
+  .fin-card{grid-row:2;position:relative;z-index:2}
   .fin-msg-bub{max-width:100%;width:100%;padding:8px 10px;font-size:.74rem}
   .fin-msg-line{display:none}
 }
@@ -1000,7 +1001,6 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
 .scene-footer nav{display:flex;flex-wrap:wrap;gap:10px 16px;pointer-events:auto}
 .fin-lists .ex-card{margin:0;flex:1;min-width:0;width:auto}
 @media(max-width:760px){
-  .stage-sticky{overflow-x:clip}
   /* swipe through the lists instead of stacking */
   .fin-lists{top:60%;width:100%;max-width:100%;gap:14px;align-items:stretch;
     overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
@@ -1594,11 +1594,11 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       var travel=r.height-window.innerHeight;
       var raw=clamp((0-r.top)/(travel||1));
       // first part of the pin is the tools→triage story; the rest is the cleared inbox → task list → outro lists
-      var SPLIT=0.68;
+      var SPLIT=0.72;
       var p=clamp(raw/SPLIT);
-      // finale tail: clean focused view + task list — stretched for a longer pin
+      // finale tail: clean focused view + task list
       var pfRaw=clamp((raw-SPLIT)/(1-SPLIT));
-      var pf=clamp(pfRaw/0.56);
+      var pf=clamp(pfRaw/0.66);
       stage.style.setProperty('--p',p.toFixed(3));
 
       // beat segments
@@ -1724,8 +1724,8 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       }
 
       // cleared: the inbox returns green, holds, then opens into the task list (same pin)
-      var iOut=clamp((pf-0.02)/0.12);          // the green inbox opening away
-      var cIn=easeOut(clamp((pf-0.04)/0.14));  // the task card opening up in its place
+      var iOut=clamp((pf-0.03)/0.10);          // the green inbox opening away
+      var cIn=easeOut(clamp((pf-0.05)/0.13));  // the task card opening up in its place
       if(stageCleared){
         stageCleared.style.opacity=(clr*(1-iOut)).toFixed(3);
         stageCleared.style.transform='translate(-50%,-50%) translateY(-82px) scale('+(0.9+clr*0.1-iOut*0.22).toFixed(3)+')';
@@ -1734,8 +1734,8 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       if(triageCap) triageCap.style.opacity=(clamp((p-0.66)/0.04)*(1-iOut)).toFixed(3);
 
       // ── final stretch: last task checks → cap swap → card exits → lists open ──
-      var out     = clamp((pf-0.70)/0.08);   // task card scrolls out only after the cap3 swap
-      var listsIn = easeOut(clamp((pf-0.76)/0.20));  // boards + footer after headline parks
+      var out     = clamp((pf-0.62)/0.08);   // task card scrolls out only after the cap3 swap
+      var listsIn = easeOut(clamp((pf-0.68)/0.28));  // boards + footer after headline parks
       var sceneH  = scene.clientHeight||520;
 
       // the guided task list — lifts as it opens, then exits upward
@@ -1745,14 +1745,14 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
         finWrap.style.transform='translate(-50%,-50%) translateY('+(finY - out*sceneH*0.7).toFixed(1)+'px) scale('+(0.9+cIn*0.1-out*0.06).toFixed(3)+')';
         finWrap.style.pointerEvents=out>0.5?'none':'auto';
       }
-      var finGuide=clamp((pf-0.20)/0.48);   // thread messages arrive, then rows check off (longer beat)
-      var capLoop=clamp((pf-0.10)/0.04)*(1-clamp((pf-0.62)/0.05)); // "clean focused view" caption holds longer
-      var capMsgvis=clamp((pf-0.20)/0.04)*(1-clamp((pf-0.58)/0.05)); // thread pings during the loop phase
+      var finGuide=clamp((pf-0.26)/0.38);   // thread messages arrive, then rows check off
+      var capLoop=clamp((pf-0.12)/0.03)*(1-clamp((pf-0.56)/0.04)); // "clean focused view" caption
+      var capMsgvis=clamp((pf-0.26)/0.03)*(1-clamp((pf-0.52)/0.04)); // thread pings during the loop phase
       var finDone=0, finProgress=0;
       finItems.forEach(function(el,n){
-        var bin=easeOut(clamp((pf-0.10-n*0.06)/0.18));   // tasks land in, staggered
-        var thr=finGuide-n*0.28;
-        var gp=clamp(thr/0.22);                           // this task's completion
+        var bin=easeOut(clamp((pf-0.12-n*0.05)/0.16));   // tasks land in, staggered
+        var thr=finGuide-n*0.24;
+        var gp=clamp(thr/0.20);                           // this task's completion
         finProgress+=easeOut(gp);
         el.style.opacity=bin.toFixed(3);
         el.style.transform='translateY('+((1-bin)*-14).toFixed(1)+'px)';
@@ -1779,7 +1779,7 @@ html.light .ex-card{background:#FBF9F2;border-color:rgba(33,30,24,.12);box-shado
       if(finCap1) finCap1.style.opacity=capLoop.toFixed(3);
       // cap3 replaces cap2 once the last task is checked, then rides up as the card exits
       if(finCap3){
-        finCap3.style.opacity=clamp((pf-0.66)/0.04).toFixed(3);
+        finCap3.style.opacity=clamp((pf-0.58)/0.03).toFixed(3);
         finCap3.style.transform='translateX(-50%) translateY('+(-out*sceneH*0.88).toFixed(1)+'px)';
       }
       if(finExplore) finExplore.style.opacity=easeOut(clamp((listsIn-0.12)/0.38)).toFixed(3);
