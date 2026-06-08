@@ -1108,8 +1108,7 @@ html.ios .stage-sticky.is-pinned{
 html.ios .stage-sticky.is-past{
   position:absolute!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;
   width:100%!important;z-index:10}
-html.ios .scene{overflow:hidden;contain:layout style paint}
-html.ios.touch .scene{overflow-x:hidden;overflow-y:visible}
+html.ios .scene{overflow-x:hidden;overflow-y:visible;contain:none}
 html.touch:not(.ios) .stage-sticky{
   overflow:hidden;
   -webkit-mask-image:none;
@@ -1121,7 +1120,7 @@ html.touch:not(.ios) .orbit .anode .ai{animation:appfloat-a 7s ease-in-out infin
 html.touch:not(.ios) .orbit .anode:nth-child(3n+2) .ai{animation-name:appfloat-b;animation-duration:7.6s}
 html.touch:not(.ios) .orbit .anode:nth-child(3n) .ai{animation-duration:6.4s}
 html.ios .orbit .anode .ai{animation:none!important}
-html.touch .anode .abub{animation:none}
+html.touch .anode .abub{animation:bubpop 7s var(--ease) infinite;will-change:opacity,transform}
 html.touch .ib-dot,
 html.touch .tg-dot,
 html.touch .inbox-ico .ib-dot.ok{animation:none}
